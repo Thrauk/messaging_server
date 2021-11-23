@@ -4,22 +4,63 @@ import com.rabbitmq.client.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
 
 public class Consumer {
 
-    public static void main(String[] args) throws IOException, TimeoutException {
+    public Consumer(String queueName) {
+        try {
+            this.channel = ConnectionManager.connection.createChannel();
+            this.queueName = queueName;
+            this.consumerName = "consumer_for_" + queueName;
+            this.channel.queueDeclare(this.queueName, false, false, false, null);
+        } catch (IOException e) {
+            System.out.println("An error occurred while creating a Consumer!");
+        }
+    }
 
-        ConnectionFactory factory = new ConnectionFactory();
-        Connection connection = factory.newConnection();
-        Channel channel = connection.createChannel();
-        channel.queueDeclare("hello-world", false, false, false, null);
+    public Consumer(String queueName, String consumerName) {
+        try {
+            this.channel = ConnectionManager.connection.createChannel();
+            this.queueName = queueName;
+            this.consumerName = consumerName;
+            this.channel.queueDeclare(this.queueName, false, false, false, null);
+        } catch (IOException e) {
+            System.out.println("An error occurred while creating a Consumer!");
+        }
+    }
 
-        channel.basicConsume("hello-world", true, (consumerTag, message) -> {
-            String m = new String(message.getBody(), StandardCharsets.UTF_8);
-            System.out.println("I just recieved a message = " + m);
+    protected Channel channel;
+    protected String queueName;
+    protected String consumerName;
+    protected Thread consumerThread = null;
 
-        }, consumerTag -> {});
+    public void startThread() {
+        if(this.consumerThread == null) {
+            setThreadRunnable(this::listenSimpleQueue);
+        }
+        this.consumerThread.start();
+    }
+
+    public void stopThread() {
+        this.consumerThread.interrupt();
+    }
+
+    protected void setThreadRunnable(Runnable target) {
+        this.consumerThread = new Thread(target);
+    }
+
+    public void listenSimpleQueue() {
+
+        try {
+            channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
+                String m = new String(message.getBody(), StandardCharsets.UTF_8);
+                //System.out.println("Consumer " + consumerName + " : " + m);
+
+            }, consumerTag -> {});
+        } catch (IOException e) {
+            System.out.println("Error listening " + queueName);
+        }
 
     }
 
