@@ -1,10 +1,24 @@
 package messaging_server.models;
 
-public class SimpleMessage {
+import java.io.IOException;
+
+public class SimpleMessage extends JsonObject {
     private String messageSender;
     private String messageReceiver;
     private String message;
 
+    public SimpleMessage(byte[] bytes)
+    {
+        try {
+            SimpleMessage sm;
+            sm=objectMapper.readValue(bytes, SimpleMessage.class);
+            this.messageSender=sm.getMessageSender();
+            this.messageReceiver=sm.getMessageReceiver();
+            this.message=sm.getMessage();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public SimpleMessage(String ms, String mr, String m)
     {
         this.messageSender=ms;
