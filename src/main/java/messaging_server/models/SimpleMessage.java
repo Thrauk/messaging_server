@@ -1,11 +1,11 @@
 package messaging_server.models;
 
-public class JsonExample {
+public class SimpleMessage {
     private String messageSender;
     private String messageReceiver;
     private String message;
 
-    public JsonExample(String ms, String mr, String m)
+    public SimpleMessage(String ms, String mr, String m)
     {
         this.messageSender=ms;
         this.messageReceiver=mr;

@@ -1,6 +1,7 @@
 package messaging_server.server.data;
 
 import com.rabbitmq.client.DeliverCallback;
+import messaging_server.models.SimpleMessage;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +11,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class ServerData {
     public final List<String> connectedClients = Collections.synchronizedList(new ArrayList<String>());
 
-    public final List<String> messagesToSend = Collections.synchronizedList(new ArrayList<String>());
+    public final List<SimpleMessage> messagesToSend = Collections.synchronizedList(new ArrayList<SimpleMessage>());
 
 
     public void displayConnectedClients() {

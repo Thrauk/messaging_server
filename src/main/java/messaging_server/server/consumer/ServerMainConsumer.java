@@ -1,6 +1,9 @@
 package messaging_server.server.consumer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import messaging_server.Consumer;
+import messaging_server.models.SimpleMessage;
 import messaging_server.server.Server;
 import messaging_server.server.data.ServerData;
 
@@ -12,7 +15,7 @@ public class ServerMainConsumer extends Consumer {
     public ServerMainConsumer(String queueName, ServerData serverData) {
         super(queueName);
         this.serverData = serverData;
-        this.setThreadRunnable(this::listenServerMainQueue);
+        this.setThreadRunnable(this::listenServerMainQueueTesting);
     }
 
     private final ServerData serverData;
@@ -35,19 +38,23 @@ public class ServerMainConsumer extends Consumer {
 
     }
 
-    public void listenServerMainQueueTesting() {
+    public void listenServerMainQueueTesting(){
+        ObjectMapper objectMapper = new ObjectMapper();
+        //SimpleMessage sm = new SimpleMessage("client-1", "server", "ConnectionReq");
+        //byte[] sm_bytes = objectMapper.writeValueAsBytes(sm);
 
         try {
             channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
-                String m = new String(message.getBody(), StandardCharsets.UTF_8);
-                if(serverData.connectedClients.contains(m)) {
+                SimpleMessage rec = objectMapper.readValue(message.getBody(), SimpleMessage.class);
+                if(rec != null) {
                     synchronized (serverData.messagesToSend) {
-                        serverData.messagesToSend.add(this.queue);
+                        serverData.messagesToSend.add(new SimpleMessage("server", rec.getMessageSender(), "Conn succ"));
+                    }
+                    synchronized (serverData.connectedClients) {
+                        serverData.connectedClients.add(rec.getMessageSender());
                     }
                 }
-                synchronized (serverData.connectedClients) {
-                    serverData.connectedClients.add(m);
-                }
+
 
             }, consumerTag -> {});
         } catch (IOException e) {
