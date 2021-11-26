@@ -10,15 +10,24 @@ import java.util.concurrent.TimeoutException;
 
 public class App {
     public static void main(String [] args) {
-        Server server = new Server();
+
+        switch (args[0].toLowerCase()){
+
+            case "client":clientMain();break;
+
+            case "server":serverMain();break;
+
+            default:System.out.println("Not a valid option.");
+
+        }
+
+    }
+
+    public static void clientMain()
+    {
+      /*  Server server = new Server();
         ConnectionManager.createConnection();
-        Thread serverThread = new Thread(() -> {
-            try {
-                server.serverRoutine();
-            } catch(InterruptedException v) {
-                System.out.println(v);
-            }
-        });
+
         Thread clientThread = new Thread(() -> {
             try {
                 Client.clientRoutine();
@@ -26,8 +35,41 @@ public class App {
                 System.out.println(v);
             }
         });
-        serverThread.start();
+
         clientThread.start();
+        */
+
+        Server server = new Server();
+        Client client = new Client();
+
+        ConnectionManager.createConnection();
+
+        Thread clientThread = new Thread(() -> {
+            try {
+                client.consoleRoutine();
+            } catch(IOException v) {
+                System.out.println(v);
+            }
+        });
+
+        clientThread.start();
+
+    }
+
+    public static void serverMain()
+    {
+        Server server = new Server();
+        ConnectionManager.createConnection();
+
+        Thread serverThread = new Thread(() -> {
+            try {
+                server.serverRoutine();
+            } catch(InterruptedException v) {
+                System.out.println(v);
+            }
+        });
+
+        serverThread.start();
     }
 
 
