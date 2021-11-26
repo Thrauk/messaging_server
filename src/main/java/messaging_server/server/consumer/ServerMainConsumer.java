@@ -35,4 +35,27 @@ public class ServerMainConsumer extends Consumer {
 
     }
 
+    public void listenServerMainQueueTesting() {
+
+        try {
+            channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
+                String m = new String(message.getBody(), StandardCharsets.UTF_8);
+                if(serverData.connectedClients.contains(m)) {
+                    synchronized (serverData.messagesToSend) {
+                        serverData.messagesToSend.add(this.queue);
+                    }
+                }
+                synchronized (serverData.connectedClients) {
+                    serverData.connectedClients.add(m);
+                }
+
+            }, consumerTag -> {});
+        } catch (IOException e) {
+            System.out.println("Error listening " + queueName);
+            e.printStackTrace();
+
+        }
+
+    }
+
 }

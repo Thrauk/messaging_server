@@ -37,13 +37,19 @@ public class Server {
         }
     }
 
+    public void testServerListenRoutine() {
+        this.listenForClients();
+
+    }
+
     private ServerData serverData;
 
     private void listenForClients() {
         Consumer connectionListener = new Consumer("server-receiver", "server-receiver");
         connectionListener.startThread();
-
     }
+
+
 
     private void removeClient() throws InterruptedException {
         int client_id = 0;

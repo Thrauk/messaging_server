@@ -10,6 +10,10 @@ import java.util.concurrent.TimeoutException;
 
 public class App {
     public static void main(String [] args) {
+
+
+
+
         Server server = new Server();
         ConnectionManager.createConnection();
         Thread serverThread = new Thread(() -> {

@@ -10,6 +10,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 public class ServerData {
     public final List<String> connectedClients = Collections.synchronizedList(new ArrayList<String>());
 
+    public final List<String> messagesToSend = Collections.synchronizedList(new ArrayList<String>());
+
+
     public void displayConnectedClients() {
         System.out.println("Connected clients: ");
         synchronized (connectedClients) {

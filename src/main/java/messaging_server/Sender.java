@@ -19,7 +19,7 @@ public class Sender {
 
     }
 
-    private Channel channel;
+    protected Channel channel;
 
     public void sendMessageOnSimpleQueue(String message, String queueName) {
         //message += " " + LocalDateTime.now();
