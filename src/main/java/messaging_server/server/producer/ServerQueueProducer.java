@@ -1,5 +1,6 @@
 package messaging_server.server.producer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import messaging_server.Sender;
 import messaging_server.models.SimpleMessage;
 import messaging_server.server.data.ServerData;
@@ -38,7 +39,9 @@ public class ServerQueueProducer  extends Sender {
                 if(serverData.messagesToSend.size() > 0) {
                     SimpleMessage sm = serverData.messagesToSend.get(0);
                     serverData.messagesToSend.remove(0);
+                    System.out.println("Sent message on queue " + sm.getMessageReceiver());
 
+                    sendJsonOnSimpleQueue(sm, sm.getMessageReceiver() + "-receiver");
                 }
             }
 
@@ -48,8 +51,10 @@ public class ServerQueueProducer  extends Sender {
 
     public void sendJsonOnSimpleQueue(SimpleMessage sm, String queueName) {
         //message += " " + LocalDateTime.now();
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            this.channel.basicPublish("", queueName, false, null, message.getBytes());
+            String sm_string = objectMapper.writeValueAsString(sm);
+            this.channel.basicPublish("", queueName, false, null, sm_string.getBytes());
             //System.out.println("sent message " + message);
         } catch (IOException e) {
             System.out.println("An error has occured while trying to send a message on " + queueName + " queue");

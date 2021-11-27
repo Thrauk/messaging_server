@@ -6,7 +6,10 @@ import messaging_server.Consumer;
 import messaging_server.Sender;
 import messaging_server.server.consumer.ServerMainConsumer;
 import messaging_server.server.data.ServerData;
+import messaging_server.server.producer.ServerQueueProducer;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 public class Server {
@@ -34,6 +37,17 @@ public class Server {
             sender.sendMessageOnSimpleQueue("This is message", "hello-queue-3");
             this.serverData.displayConnectedClients();
             TimeUnit.SECONDS.sleep(2);
+        }
+    }
+
+    public void serverTestRoutine() {
+        System.out.println("Server started");
+        ServerMainConsumer serverMainConsumer = new ServerMainConsumer("server-receiver", this.serverData);
+        serverMainConsumer.startThread();
+        ServerQueueProducer serverQueueProducer = new ServerQueueProducer(this.serverData);
+        serverQueueProducer.startThread();
+        while(true) {
+
         }
     }
 

@@ -45,10 +45,22 @@ public class ServerMainConsumer extends Consumer {
 
         try {
             channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
-                SimpleMessage rec = objectMapper.readValue(message.getBody(), SimpleMessage.class);
+                System.out.println("Got message");
+                String m = new String(message.getBody(), StandardCharsets.UTF_8);
+                System.out.println(m);
+                //System.out.println(message.getBody());
+
+                SimpleMessage rec = objectMapper.readValue(m, SimpleMessage.class);
+                System.out.println("Sender is " + rec.getMessageSender());
+
+
                 if(rec != null) {
                     synchronized (serverData.messagesToSend) {
-                        serverData.messagesToSend.add(new SimpleMessage("server", rec.getMessageSender(), "Conn succ"));
+                        SimpleMessage sm = new SimpleMessage();
+                        sm.setMessageSender("server");
+                        sm.setMessageReceiver(rec.getMessageSender());
+                        sm.setMessage("Conn succ");
+                        serverData.messagesToSend.add(sm);
                     }
                     synchronized (serverData.connectedClients) {
                         serverData.connectedClients.add(rec.getMessageSender());

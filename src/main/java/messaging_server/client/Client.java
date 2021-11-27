@@ -1,9 +1,16 @@
 package messaging_server.client;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rabbitmq.client.Channel;
 import messaging_server.App;
 import messaging_server.ConnectionManager;
 import messaging_server.Consumer;
 import messaging_server.Sender;
+import messaging_server.client.consumer.ServerMessagesListener;
+import messaging_server.client.data.ClientData;
+import messaging_server.models.SimpleMessage;
+import messaging_server.server.consumer.ServerMainConsumer;
+import messaging_server.server.data.ServerData;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +20,12 @@ import java.util.concurrent.TimeUnit;
 
 public class Client {
 
+    public Client() {
+        this.clientData = new ClientData();
+    }
+
     private String clientName;
+    private final ClientData clientData;
 
     public void consoleRoutine() throws IOException {
 
@@ -21,6 +33,23 @@ public class Client {
         BufferedReader reader =
                 new BufferedReader(new InputStreamReader(System.in));
         clientName = reader.readLine();
+
+        SimpleMessage sm = new SimpleMessage();
+        sm.setMessageSender(clientName);
+        sm.setMessageReceiver("server");
+        sm.setMessage("Conn req");
+
+        this.sendJsonOnSimpleQueue(sm, "server-receiver");
+
+        Thread clientListenServerMsgThread = new Thread(this::clientRoutineTest);
+        clientListenServerMsgThread.start();
+
+        System.out.flush();
+
+        System.out.println("Waiting for server response...");
+
+        while(!clientData.isConnected) {
+        }
 
         System.out.println("This is client '"+clientName+"' and it can do the following: ");
         System.out.println("1) Send a message to other clients.");
@@ -53,6 +82,30 @@ public class Client {
             sender.sendMessageOnSimpleQueue("client" + counter, "server-receiver");
             counter += 1;
             TimeUnit.SECONDS.sleep(1);
+        }
+    }
+
+    public void clientRoutineTest() {
+        ServerMessagesListener serverMessagesListener = new ServerMessagesListener(this.clientName + "-receiver", this.clientData);
+        serverMessagesListener.startThread();
+        while(true) {
+
+        }
+    }
+
+
+    public void sendJsonOnSimpleQueue(SimpleMessage sm, String queueName) {
+        //message += " " + LocalDateTime.now();
+        Channel channel;
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            channel = ConnectionManager.connection.createChannel();
+            String sm_string = objectMapper.writeValueAsString(sm);
+            channel.basicPublish("", queueName, false, null, sm_string.getBytes());
+            //System.out.println("sent message " + message);
+        } catch (IOException e) {
+            System.out.println("An error has occured while trying to send a message on " + queueName + " queue");
         }
     }
 }

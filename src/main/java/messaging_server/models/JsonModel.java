@@ -19,7 +19,7 @@ public class JsonModel {
             ObjectMapper mapper = new ObjectMapper();
 
             SequenceWriter seqWriter = mapper.writer().writeValuesAsArray(fileWriter);
-            seqWriter.write(new SimpleMessage("Andrei","Mihai" ,"I have apples."));
+            //seqWriter.write(new SimpleMessage("Andrei","Mihai" ,"I have apples."));
             seqWriter.close();
         } catch (IOException e) {
             e.printStackTrace();

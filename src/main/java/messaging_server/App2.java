@@ -8,7 +8,7 @@ import messaging_server.server.Server;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-public class App {
+public class App2 {
     public static void main(String [] args) {
 
         switch (args[0].toLowerCase()){

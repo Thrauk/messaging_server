@@ -5,12 +5,7 @@ public class SimpleMessage {
     private String messageReceiver;
     private String message;
 
-    public SimpleMessage(String ms, String mr, String m)
-    {
-        this.messageSender=ms;
-        this.messageReceiver=mr;
-        this.message=m;
-    }
+
     public String getMessageSender() {
         return messageSender;
     }
@@ -33,8 +28,5 @@ public class SimpleMessage {
 
     public void setMessage(String message) {
         this.message = message;
-    }
-    public String toString() {
-        return messageSender + " --> " + messageReceiver + "\n: " + message + "\n";
     }
 }
