@@ -1,4 +1,4 @@
-package messaging_server;
+package messaging_server.rabbitMQ;
 
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;

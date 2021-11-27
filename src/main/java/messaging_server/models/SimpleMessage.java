@@ -1,6 +1,6 @@
 package messaging_server.models;
 
-public class SimpleMessage {
+public class SimpleMessage{
     private String messageSender;
     private String messageReceiver;
     private String message;

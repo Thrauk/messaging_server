@@ -1,12 +1,10 @@
 package messaging_server;
 
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 import messaging_server.client.Client;
+import messaging_server.rabbitMQ.ConnectionManager;
 import messaging_server.server.Server;
 
 import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 public class App {
     public static void main(String [] args) {
@@ -62,13 +60,7 @@ public class App {
         Server server = new Server();
         ConnectionManager.createConnection();
 
-        Thread serverThread = new Thread(() -> {
-            try {
-                server.serverRoutine();
-            } catch(InterruptedException v) {
-                System.out.println(v);
-            }
-        });
+        Thread serverThread = new Thread(server::serverTestRoutine);
 
         serverThread.start();
     }

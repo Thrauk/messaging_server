@@ -1,16 +1,12 @@
-package messaging_server;
+package messaging_server.rabbitMQ;
 
 import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.concurrent.TimeoutException;
 
-public class Sender {
+public class Producer {
 
-    public Sender() {
+    public Producer() {
         try {
             this.channel = ConnectionManager.connection.createChannel();
         } catch (IOException e) {

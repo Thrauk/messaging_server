@@ -16,5 +16,6 @@ public class JsonObject {
           e.printStackTrace();
           System.out.println("No bytes for you!");
       }
+      return null;
   }
 }

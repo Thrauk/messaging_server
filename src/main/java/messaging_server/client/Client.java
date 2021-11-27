@@ -2,15 +2,13 @@ package messaging_server.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
-import messaging_server.App;
-import messaging_server.ConnectionManager;
-import messaging_server.Consumer;
-import messaging_server.Sender;
+import messaging_server.rabbitMQ.ConnectionManager;
+import messaging_server.rabbitMQ.Consumer;
+import messaging_server.rabbitMQ.Producer;
 import messaging_server.client.consumer.ServerMessagesListener;
 import messaging_server.client.data.ClientData;
 import messaging_server.models.SimpleMessage;
-import messaging_server.server.consumer.ServerMainConsumer;
-import messaging_server.server.data.ServerData;
+import messaging_server.rabbitMQ.RabbitMQConstants;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -39,7 +37,7 @@ public class Client {
         sm.setMessageReceiver("server");
         sm.setMessage("Conn req");
 
-        this.sendJsonOnSimpleQueue(sm, "server-receiver");
+        this.sendJsonOnSimpleQueue(sm, RabbitMQConstants.serverReceivingQueue);
 
         Thread clientListenServerMsgThread = new Thread(this::clientRoutineTest);
         clientListenServerMsgThread.start();
@@ -69,25 +67,10 @@ public class Client {
 
     }
 
-    public static void clientRoutine() throws InterruptedException {
-        Consumer consumer1 = new Consumer("hello-queue-1", "con1");
-        Consumer consumer2 = new Consumer("hello-queue-2", "con2");
-        Consumer consumer3 = new Consumer("hello-queue-3", "con3");
-        consumer1.startThread();
-        consumer2.startThread();
-        consumer3.startThread();
-        Sender sender = new Sender();
-        int counter = 0;
-        while(true) {
-            sender.sendMessageOnSimpleQueue("client" + counter, "server-receiver");
-            counter += 1;
-            TimeUnit.SECONDS.sleep(1);
-        }
-    }
 
     public void clientRoutineTest() {
         ServerMessagesListener serverMessagesListener = new ServerMessagesListener(this.clientName + "-receiver", this.clientData);
-        serverMessagesListener.startThread();
+        serverMessagesListener.thread.start();
         while(true) {
 
         }
