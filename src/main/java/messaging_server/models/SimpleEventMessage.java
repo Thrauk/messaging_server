@@ -1,9 +1,10 @@
 package messaging_server.models;
 
-public class SimpleMessage extends JsonObject {
+public class SimpleEventMessage extends JsonObject {
     private String messageSender;
     private String messageReceiver;
     private String message;
+    private String eventType;
 
 
     public String getMessageSender() {
@@ -28,5 +29,13 @@ public class SimpleMessage extends JsonObject {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
     }
 }

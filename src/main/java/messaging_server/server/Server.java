@@ -1,24 +1,60 @@
 package messaging_server.server;
 
-import messaging_server.rabbitMQ.Consumer;
-import messaging_server.rabbitMQ.Producer;
+import messaging_server.rabbitMQ.RabbitMQConstants;
 import messaging_server.server.consumer.ServerMainConsumer;
-import messaging_server.server.data.ServerData;
-import messaging_server.server.producer.ServerMessageProducer;
-import messaging_server.server.routines.ServerListenForMessages;
-import messaging_server.server.routines.ServerRoutine;
+import messaging_server.server.routines.ServerConnectionManager;
+import messaging_server.server.routines.ServerEventManager;
+import messaging_server.server.routines.ServerSendQueuedMessages;
 
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class Server {
 
-    public void serverTestRoutine() {
-        System.out.println("Server Started");
-        ServerRoutine serverListenForMessages = new ServerListenForMessages();
-        serverListenForMessages.thread.start();
-        while(true) {
 
+
+    public Server() {
+    }
+
+    private final List<Thread> threads = new ArrayList<>();
+
+    public void serverTestRoutine() {
+        System.out.println("Server initialising");
+
+        ServerSendQueuedMessages serverSendQueuedMessages = new ServerSendQueuedMessages();
+        threads.add(serverSendQueuedMessages.thread);
+        //serverMessageSender.thread.start();
+
+
+
+        ServerMainConsumer serverMainConsumer = new ServerMainConsumer(RabbitMQConstants.serverReceivingQueue);
+        threads.add(serverMainConsumer.thread);
+
+        ServerConnectionManager serverConnectionManager = new ServerConnectionManager();
+        threads.add(serverConnectionManager.thread);
+
+        ServerEventManager serverEventManager = new ServerEventManager();
+        threads.add(serverEventManager.thread);
+
+        for(Thread thread : threads) {
+            thread.start();
         }
+
+        System.out.println("Server started!");
+
+        //serverListenForMessages.thread.start();
+
+        try {
+            for(Thread thread : threads) {
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        System.out.println("Server Closed");
     }
 
 }

@@ -1,12 +1,13 @@
 package messaging_server.server.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import messaging_server.models.SimpleEventMessage;
 import messaging_server.rabbitMQ.Consumer;
-import messaging_server.models.SimpleMessage;
+import messaging_server.rabbitMQ.MessageEvents;
 import messaging_server.server.data.ServerData;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 
 public class ServerMainConsumer extends Consumer {
 
@@ -15,29 +16,30 @@ public class ServerMainConsumer extends Consumer {
         super(queueName);
     }
     private final ObjectMapper objectMapper = new ObjectMapper();
-
+    LocalDateTime timeReceived;
 
     @Override
     protected void listener() {
         try {
             channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
                 System.out.println("Got message");
-                String m = new String(message.getBody(), StandardCharsets.UTF_8);
-                System.out.println(m);
-                //System.out.println(message.getBody());
 
-                SimpleMessage rec = objectMapper.readValue(m, SimpleMessage.class);
-                System.out.println("Sender is " + rec.getMessageSender());
+                timeReceived = LocalDateTime.now();
 
 
-                SimpleMessage sm = new SimpleMessage();
-                sm.setMessageSender("server");
-                sm.setMessageReceiver(rec.getMessageSender());
-                sm.setMessage("Conn succ");
-                ServerData.messagesToSend.add(sm);
+                SimpleEventMessage jsonMessage = objectMapper.readValue(message.getBody(), SimpleEventMessage.class);
+                String sender_id = jsonMessage.getMessageSender();
+                System.out.println("Sender is " + jsonMessage.getMessageSender());
 
 
-                ServerData.connectedClients.add(rec.getMessageSender());
+
+                if(jsonMessage.getEventType().equals(MessageEvents.connectionRequest)) {
+                    ServerData.incomingConnectionRequests.add(jsonMessage);
+                } else if(ServerData.connectedClients.exists(sender_id)) {
+                    ServerData.connectedClients.get(sender_id).setLastMessageReceived(timeReceived);
+                    ServerData.incomingMessages.add(jsonMessage);
+                }
+
 
 
             }, consumerTag -> {});
@@ -48,14 +50,5 @@ public class ServerMainConsumer extends Consumer {
         }
     }
 
-
-    public void listenServerMainQueueTesting(){
-
-        //SimpleMessage sm = new SimpleMessage("client-1", "server", "ConnectionReq");
-        //byte[] sm_bytes = objectMapper.writeValueAsBytes(sm);
-
-
-
-    }
 
 }

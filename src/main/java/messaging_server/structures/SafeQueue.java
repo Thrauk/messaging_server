@@ -1,14 +1,13 @@
-package messaging_server.server.data;
+package messaging_server.structures;
 
-import messaging_server.models.JsonObject;
-import messaging_server.models.SimpleMessage;
-
+import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class SafeQueue<T> {
-    public final BlockingQueue<T> queue = new LinkedBlockingQueue<>();
+    protected final BlockingQueue<T> queue = new LinkedBlockingQueue<>();
 
+    // Add an element to the back of the queue
     public void add(T element) {
         queue.add(element);
     }
@@ -36,7 +35,22 @@ public class SafeQueue<T> {
         return null;
     }
 
+    // Remove a specific element from the queue
+    public boolean removeElement(T element) {
+        return this.queue.remove(element);
+    }
 
+    // Check if element exists in queue
+    public boolean exists(T element) {
+        return queue.contains(element);
+    }
+
+    // Export a copy of the current state of the queue as a list
+    public ArrayList<T> exportAsList() {
+        return new ArrayList<>(queue);
+    }
+
+    // Prints the current queue in console line by line
     public void displayInConsole() {
         queue.forEach(System.out::println);
     }
