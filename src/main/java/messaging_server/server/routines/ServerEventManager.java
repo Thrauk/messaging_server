@@ -7,14 +7,16 @@ import messaging_server.server.data.ServerData;
 import messaging_server.server.config.DefaultConfig;
 import messaging_server.server.models.MessageToSend;
 
-public class ServerEventManager extends ServerRoutine{
+import java.util.Objects;
+
+public class ServerEventManager extends ServerRoutine {
     @Override
     protected void routine() {
         SimpleEventMessage message = ServerData.incomingMessages.popExisting();
 
         String eventType = message.getEventType();
 
-        if(eventType.equals(MessageEvents.checkIfConnected)) {
+        if (eventType.equals(MessageEvents.checkIfConnected)) {
             checkIfConnected(message);
         }
 
@@ -24,20 +26,28 @@ public class ServerEventManager extends ServerRoutine{
         String clientId = message.getMessageSender();
         String checkId = message.getMessage();
 
-        String responseBody;
+        String responseEvent;
 
-        if(ServerData.connectedClients.exists(checkId)) {
-            responseBody = MessageResponse.clientConnected;
+        if (ServerData.connectedClients.exists(checkId)) {
+            responseEvent = MessageEvents.checkIfConnectedResponseSuccessful;
         } else {
-            responseBody = MessageResponse.clientNotConnected;
+            responseEvent = MessageEvents.checkIfConnectedResponseFailed;
         }
 
-        SimpleEventMessage response = new SimpleEventMessage();
-        response.setMessageSender(DefaultConfig.serverName);
-        response.setMessageReceiver(clientId);
-        response.setMessage(responseBody);
+        SimpleEventMessage responseToSender = new SimpleEventMessage();
+        responseToSender.setEventType(responseEvent);
+        responseToSender.setMessageSender(DefaultConfig.serverName);
+        responseToSender.setMessageReceiver(clientId);
+        responseToSender.setMessage(message.getMessageSender() + "-" + message.getMessage());
+        ServerData.messagesToSend.add(new MessageToSend(responseToSender));
 
-        ServerData.messagesToSend.add(new MessageToSend(response));
+        if (Objects.equals(responseEvent, MessageEvents.checkIfConnectedResponseSuccessful)) {
+            SimpleEventMessage responseToPartner = new SimpleEventMessage();
+            responseToPartner.setEventType(MessageEvents.listenForNewMessages);
+            responseToPartner.setMessageSender(DefaultConfig.serverName);
+            responseToPartner.setMessageReceiver(message.getMessage());
+            responseToPartner.setMessage(message.getMessageSender() + "-" + message.getMessage());
+            ServerData.messagesToSend.add(new MessageToSend(responseToPartner));
+        }
     }
-
 }

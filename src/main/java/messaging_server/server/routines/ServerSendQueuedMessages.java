@@ -1,5 +1,6 @@
 package messaging_server.server.routines;
 
+import messaging_server.models.JsonHelper;
 import messaging_server.models.SimpleEventMessage;
 import messaging_server.server.data.ServerData;
 import messaging_server.rabbitMQ.JsonMessageProducer;
@@ -15,6 +16,7 @@ public class ServerSendQueuedMessages extends ServerRoutine {
         SimpleEventMessage jsonMessage = messageToSend.getMessage();
         String receivingQueue = messageToSend.getQueue();
         if(receivingQueue != null){
+            System.out.println("Message to send "+ JsonHelper.stringify(messageToSend.getMessage()));
             System.out.println("Sent message on queue " + receivingQueue);
             serverMessageProducer.sendEventMessageOnQueue(jsonMessage, receivingQueue);
         }

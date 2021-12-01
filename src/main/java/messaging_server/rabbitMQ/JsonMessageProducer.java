@@ -14,6 +14,7 @@ public class JsonMessageProducer extends Producer {
     public void sendJsonOnSimpleQueue(SimpleMessage sm, String queueName) {
         //message += " " + LocalDateTime.now();
         try {
+            this.channel.queueDeclare(queueName, false, false, false, null);
             //String sm_string = objectMapper.writeValueAsString(sm);
             this.channel.basicPublish("", queueName, false, null, JsonHelper.getBytes(sm));
             //System.out.println("sent message " + message);
