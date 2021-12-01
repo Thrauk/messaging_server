@@ -14,7 +14,7 @@ public class ClientServerMessageSender {
         message.setMessageSender(ClientData.clientId);
         message.setMessageReceiver(RabbitMQConstants.serverId);
         message.setEventType(MessageEvents.connectionRequest);
-        message.setMessage("Conn");
+        message.setMessage(ClientData.receivingQueueServerClient);
         jsonMessageProducer.sendEventMessageOnQueue(message, RabbitMQConstants.serverReceivingQueue);
     }
 

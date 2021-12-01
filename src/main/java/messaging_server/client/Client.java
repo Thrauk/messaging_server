@@ -39,7 +39,7 @@ public class Client {
         ServerMessagesListener serverMessagesListener = new ServerMessagesListener(ClientData.receivingQueueServerClient);
         serverMessagesListener.thread.start();
 
-        System.out.flush();
+        //System.out.flush();
 
         System.out.println("Waiting for server response...");
 

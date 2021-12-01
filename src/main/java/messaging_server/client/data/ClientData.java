@@ -8,6 +8,7 @@ import messaging_server.structures.SafeQueue;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ClientData {
@@ -17,6 +18,6 @@ public class ClientData {
     public static final SafeQueue<SimpleEventMessage> messagesToSend = new SafeQueue<>();
 
     public static void setReceivingQueueServerClient() {
-        ClientData.receivingQueueServerClient = clientId + "-receiving";;
+        ClientData.receivingQueueServerClient = clientId + "-" + UUID.randomUUID();
     }
 }

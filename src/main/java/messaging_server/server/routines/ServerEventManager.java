@@ -5,6 +5,7 @@ import messaging_server.rabbitMQ.MessageEvents;
 import messaging_server.rabbitMQ.MessageResponse;
 import messaging_server.server.data.ServerData;
 import messaging_server.server.config.DefaultConfig;
+import messaging_server.server.models.MessageToSend;
 
 public class ServerEventManager extends ServerRoutine{
     @Override
@@ -36,7 +37,7 @@ public class ServerEventManager extends ServerRoutine{
         response.setMessageReceiver(clientId);
         response.setMessage(responseBody);
 
-        ServerData.messagesToSend.add(response);
+        ServerData.messagesToSend.add(new MessageToSend(response));
     }
 
 }

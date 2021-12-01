@@ -18,6 +18,11 @@ public class ClientModel {
         this.receivingQueue = clientId + "-receiving";
     }
 
+    public ClientModel(String clientId, String receivingQueue) {
+        this.clientId = clientId;
+        this.receivingQueue = receivingQueue;
+    }
+
     private String clientId;
     private String receivingQueue;
     private LocalDateTime lastMessageReceived;

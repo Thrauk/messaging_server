@@ -24,6 +24,7 @@ public class JsonMessageProducer extends Producer {
 
     public void sendEventMessageOnQueue(SimpleEventMessage message, String queueName) {
         try {
+            this.channel.queueDeclare(queueName, false, false, false, null);
             this.channel.basicPublish("", queueName, false, null, JsonHelper.getBytes(message));
         } catch (IOException e) {
             System.out.println("An error has occured while trying to send a message on " + queueName + " queue");

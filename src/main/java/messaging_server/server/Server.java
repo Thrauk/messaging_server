@@ -20,7 +20,7 @@ public class Server {
     private final List<Thread> threads = new ArrayList<>();
 
     public void serverTestRoutine() {
-        System.out.println("Server initialising");
+        System.out.println("Server initializing");
 
         ServerSendQueuedMessages serverSendQueuedMessages = new ServerSendQueuedMessages();
         threads.add(serverSendQueuedMessages.thread);
