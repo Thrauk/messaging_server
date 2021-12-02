@@ -18,4 +18,14 @@ public class ClientServerMessageSender {
         jsonMessageProducer.sendEventMessageOnQueue(message, RabbitMQConstants.serverReceivingQueue);
     }
 
+    public static void sendCheckIfPartnerConnected(String partnerUid) {
+        SimpleEventMessage message = new SimpleEventMessage();
+        message.setMessageSender(ClientData.clientId);
+        message.setMessageReceiver(RabbitMQConstants.serverId);
+        message.setEventType(MessageEvents.checkIfConnected);
+        message.setMessage(partnerUid);
+        jsonMessageProducer.sendEventMessageOnQueue(message, RabbitMQConstants.serverReceivingQueue);
+
+    }
+
 }

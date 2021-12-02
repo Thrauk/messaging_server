@@ -24,11 +24,14 @@ public class Client {
 
     private String clientName;
 
+    static int selectedOption;
+
+    public static BufferedReader reader =
+            new BufferedReader(new InputStreamReader(System.in));
+
     public void consoleRoutine() throws IOException {
 
         System.out.println("Enter a name for the client: ");
-        BufferedReader reader =
-                new BufferedReader(new InputStreamReader(System.in));
         clientName = reader.readLine();
 
         ClientData.clientId = clientName;
@@ -39,36 +42,67 @@ public class Client {
         ServerMessagesListener serverMessagesListener = new ServerMessagesListener(ClientData.receivingQueueServerClient);
         serverMessagesListener.thread.start();
 
+        for (var consumer : ClientData.partnersMessagesConsumers) {
+            consumer.thread.start();
+        }
+
         //System.out.flush();
 
         System.out.println("Waiting for server response...");
 
-        while(!ClientData.isConnected.get()) {
+        while (!ClientData.isConnected.get()) {
         }
 
-        System.out.println("This is client '"+clientName+"' and it can do the following: ");
-        System.out.println("1) Send a message to other clients.");
-        System.out.println("2) Read/Subscribe to a specific topic.");
-        System.out.println("3) Publish on a topic.");
-        System.out.println("What do you want to do? Enter an option:");
+        System.out.println("This is client '" + clientName + "' and it can do the following: ");
+//        System.out.println("1) Send a message to other clients.");
+//        System.out.println("2) Read/Subscribe to a specific topic.");
+//        System.out.println("3) Publish on a topic.");
+//        System.out.println("What do you want to do? Enter an option:");
 
-        int selectedOption = 2;
+        showMenu();
 
-        do{
-            if(selectedOption < 1 || selectedOption > 3)
-            {
+//        int selectedOption;
+//
+//        do{
+//            selectedOption = Integer.parseInt(reader.readLine());
+//            if(selectedOption < 1 || selectedOption > 3)
+//            {
+//                System.out.println("Selected option is not available, please choose again: ");
+//            }
+//            if(selectedOption == 2) {
+//                System.out.println("Write client's name:");
+//                String partnerName = reader.readLine();
+//                ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
+//
+//            }
+//        }while(selectedOption < 1 || selectedOption > 3);
+
+    }
+
+    public static void showMenu() throws IOException {
+        do {
+            System.out.println("1) Send a message to other clients.");
+            System.out.println("2) Read/Subscribe to a specific topic.");
+            System.out.println("3) Publish on a topic.");
+            System.out.println("What do you want to do? Enter an option:");
+
+            selectedOption = Integer.parseInt(reader.readLine());
+            if (selectedOption < 1 || selectedOption > 3) {
                 System.out.println("Selected option is not available, please choose again: ");
             }
-            selectedOption = Integer.parseInt(reader.readLine());
-        }while(selectedOption < 1 || selectedOption > 3);
-
+            if (selectedOption == 1) {
+                System.out.println("Write client's name:");
+                String partnerName = reader.readLine();
+                ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
+            }
+        } while (selectedOption < 1 || selectedOption > 3);
     }
 
 
     public void clientRoutineTest() {
         ServerMessagesListener serverMessagesListener = new ServerMessagesListener(this.clientName + "-receiver");
         serverMessagesListener.thread.start();
-        while(true) {
+        while (true) {
 
         }
     }

@@ -3,14 +3,11 @@ package messaging_server;
 import messaging_server.client.Client;
 import messaging_server.rabbitMQ.ConnectionManager;
 import messaging_server.server.Server;
-import org.apache.log4j.BasicConfigurator;
 
 import java.io.IOException;
 
-public class App2 {
+public class App3 {
     public static void main(String [] args) {
-
-        BasicConfigurator.configure();
 
         switch (args[0].toLowerCase()){
 

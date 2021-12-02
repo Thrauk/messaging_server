@@ -13,6 +13,12 @@ public class Partner {
         this.sendingQueue = sendingQueue;
     }
 
+
+    public Partner(String partnerId, String sendingQueue) {
+        this.partnerId = partnerId;
+        this.sendingQueue = sendingQueue;
+    }
+
     private String partnerId;
     private String receivingQueue;
     private String sendingQueue;
