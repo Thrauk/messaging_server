@@ -12,7 +12,7 @@ public class TopicProducer extends Producer{
             super();
             this.topicName=EXCHANGE_NAME;
             try {
-                channel.exchangeDeclare(EXCHANGE_NAME, "fanout");
+                channel.exchangeDeclare(this.topicName, "fanout");
             } catch (IOException e) {
                 e.printStackTrace();
             }

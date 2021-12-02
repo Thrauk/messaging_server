@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
 import messaging_server.client.routines.ClientRoutine;
 import messaging_server.client.utility.ClientServerMessageSender;
+import messaging_server.client.utility.ClientTopicOperations;
 import messaging_server.models.JsonHelper;
 import messaging_server.models.SimpleEventMessage;
 import messaging_server.rabbitMQ.ConnectionManager;
@@ -94,6 +95,37 @@ public class Client {
                 System.out.println("Write client's name:");
                 String partnerName = reader.readLine();
                 ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
+            }
+            if (selectedOption==2)
+            {
+                System.out.println("Write topic name: ");
+                String topicName=reader.readLine();
+
+                if(ClientData.topicSubscriptions.exists(topicName))
+                {
+                    //TopicConsumer nume =ClientData.topicSubscriptions.get(topicName)
+                    //metoda(nume.savedMessages)
+                    /*
+                           afisare de mesaje de pe topic iar in metoda  metoda facem pop de mesajele din lista pentru a afisa o singura data
+                     */
+                }
+                else
+                {
+                    ClientTopicOperations.subscribeToTopic(topicName);
+                }
+                showMenu();
+            }
+            if (selectedOption == 3) {
+                System.out.println("Write topic's to subscribe name:");
+                String topicName = reader.readLine();
+                System.out.println("Write message: ");
+                String message = reader.readLine();
+                SimpleMessage sm=new SimpleMessage();
+                sm.setMessage(message);
+                sm.setMessageReceiver("");
+                sm.setMessageSender(ClientData.clientId);
+                ClientTopicOperations.publishToTopic(topicName, sm);
+                showMenu();
             }
         } while (selectedOption < 1 || selectedOption > 3);
     }
