@@ -1,6 +1,7 @@
 package messaging_server.server.routines;
 
 import messaging_server.server.Server;
+import messaging_server.server.config.DefaultConfig;
 import messaging_server.server.data.ServerData;
 import messaging_server.server.models.ClientModel;
 
@@ -123,7 +124,7 @@ public class ServerConsole extends ServerRoutine{
         ArrayList<String> clientsConnected =
                 ServerData.connectedClients.exportKeysAsList();
 
-        System.out.println("Select client id to configure:");
+        System.out.println("Select client id to configure, or press Enter to return:");
 
         for(String s : clientsConnected)
         {
@@ -145,7 +146,60 @@ public class ServerConsole extends ServerRoutine{
 
         if(selectedClient != null)
         {
-            //tbd
+
+            clientConfigurationMenu(selectedClient);
+
+            boolean valueOk = true;
+            int selectedOption = 0;
+            do {
+                valueOk = true;
+                try
+                {
+                    selectedOption = Integer.parseInt(reader.readLine());
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                    System.out.println("Reading error occurred!");
+                    valueOk = false;
+                }
+                catch (NumberFormatException e)
+                {
+                    e.printStackTrace();
+                    System.out.println("Input is not a number!");
+                    valueOk = false;
+                }
+
+
+                switch (selectedOption) {
+
+                    case 0:
+                        break;
+
+                    case 1:
+                        clientConfigureTimeout(selectedClient);
+                        break;
+
+                    case 2:
+                        clientConfigureQueue(selectedClient);
+                        break;
+
+
+                    default:
+                    {
+                        System.out.println("Selected option is not available, please try again.");
+                        clientConfigurationMenu(selectedClient);
+                        valueOk = false;
+                    }
+                }
+            }while(!valueOk);
+
+
+        }
+        else
+        {
+            if(!selectedClientId.equals(""))
+                System.out.println("Requested client is not connected!");
         }
     }
 
@@ -159,4 +213,63 @@ public class ServerConsole extends ServerRoutine{
 
     }
 
+    private void clientConfigurationMenu(ClientModel client)
+    {
+        System.out.println("Configuring options for client "+client.getClientId()+":");
+
+        System.out.println("1)Modify client timeout. (Current timeout settings:"+client.getTimeout()+" s)");
+        System.out.println("2)Modify client maximum message queue (Current queue settings: maximum "+client.getMaximumMessageQueue()+" messages in queue)");
+
+        System.out.println("\n0)Exit to menu");
+        System.out.println("Select option:");
+
+    }
+
+    private void clientConfigureTimeout(ClientModel client)
+    {
+        System.out.println("Enter new timeout (seconds) for the client:");
+
+        int newTimeout = DefaultConfig.clientTimeout;
+
+        try
+        {
+            newTimeout = Integer.parseInt(reader.readLine());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            System.out.println("Reading error occurred!");
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+            System.out.println("Input is not a number!");
+        }
+
+        client.setTimeout(newTimeout);
+    }
+
+    private void clientConfigureQueue(ClientModel client)
+    {
+        System.out.println("Enter new maximum messages in queue for the client:");
+
+        int newMaxQueue = DefaultConfig.clientTimeout;
+
+        try
+        {
+            newMaxQueue = Integer.parseInt(reader.readLine());
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            System.out.println("Reading error occurred!");
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+            System.out.println("Input is not a number!");
+        }
+
+        client.setMaximumMessageQueue(newMaxQueue);
+    }
 }
