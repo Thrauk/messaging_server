@@ -7,13 +7,10 @@ import messaging_server.client.utility.ClientServerMessageSender;
 import messaging_server.client.utility.ClientTopicOperations;
 import messaging_server.models.JsonHelper;
 import messaging_server.models.SimpleEventMessage;
-import messaging_server.rabbitMQ.ConnectionManager;
-import messaging_server.rabbitMQ.Consumer;
-import messaging_server.rabbitMQ.Producer;
+import messaging_server.rabbitMQ.*;
 import messaging_server.client.consumer.ServerMessagesListener;
 import messaging_server.client.data.ClientData;
 import messaging_server.models.SimpleMessage;
-import messaging_server.rabbitMQ.RabbitMQConstants;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -103,11 +100,13 @@ public class Client {
 
                 if(ClientData.topicSubscriptions.exists(topicName))
                 {
+                    TopicConsumer tc =ClientData.topicSubscriptions.get(topicName);
                     //TopicConsumer nume =ClientData.topicSubscriptions.get(topicName)
                     //metoda(nume.savedMessages)
                     /*
                            afisare de mesaje de pe topic iar in metoda  metoda facem pop de mesajele din lista pentru a afisa o singura data
                      */
+                    tc.getMessagesFromTopic();
                 }
                 else
                 {
