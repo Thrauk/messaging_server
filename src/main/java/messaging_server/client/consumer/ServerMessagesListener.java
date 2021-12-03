@@ -29,7 +29,7 @@ public class ServerMessagesListener extends Consumer {
                 if (!ClientData.isConnected.get()) {
                     if (jsonMessage.getEventType().equals(MessageEvents.connectionRequestResponseSuccessful)) {
                         ClientData.isConnected.compareAndSet(false, true);
-                        System.out.println("Client connected succ");
+                        System.out.println("Client connected successfully");
                     } else {
                         System.out.println("Client connection failed");
                     }
@@ -37,7 +37,7 @@ public class ServerMessagesListener extends Consumer {
                     if (jsonMessage.getEventType().equals(MessageEvents.checkIfConnectedResponseSuccessful)) {
                         String receivedMessage = jsonMessage.getMessage();
                         String partnerUid = receivedMessage.split("-")[1];
-                        System.out.println("Client " + partnerUid + "is connected");
+                        System.out.println("Client " + partnerUid + " is connected");
                         ClientData.connectedPartners.add(new Partner(partnerUid, receivedMessage));
 
                         // to be moved in a function

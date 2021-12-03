@@ -27,6 +27,7 @@ public class ClientModel {
     private String receivingQueue;
     private LocalDateTime lastMessageReceived;
     private int timeout = DefaultConfig.clientTimeout;
+    private int maximumMessageQueue = DefaultConfig.maxMsgQueue;
 
     public long getTimeDifference() {
         LocalDateTime now = LocalDateTime.now();
@@ -67,5 +68,13 @@ public class ClientModel {
 
     public void setTimeout(int timeout) {
         this.timeout = timeout;
+    }
+
+    public int getMaximumMessageQueue() {
+        return maximumMessageQueue;
+    }
+
+    public void setMaximumMessageQueue(int maximumMessageQueue) {
+        this.maximumMessageQueue = maximumMessageQueue;
     }
 }
