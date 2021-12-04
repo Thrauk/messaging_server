@@ -2,6 +2,7 @@ package messaging_server.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
+import messaging_server.client.routines.ClientHeartbeat;
 import messaging_server.client.routines.ClientRoutine;
 import messaging_server.client.utility.ClientServerMessageSender;
 import messaging_server.client.utility.ClientTopicOperations;
@@ -40,7 +41,7 @@ public class Client {
         ServerMessagesListener serverMessagesListener = new ServerMessagesListener(ClientData.receivingQueueServerClient);
         serverMessagesListener.thread.start();
 
-        for (var consumer : ClientData.partnersMessagesConsumers) {
+        for (var consumer : ClientData.partnersMessagesConsumers.exportAsList()) {
             consumer.thread.start();
         }
 
@@ -50,6 +51,9 @@ public class Client {
 
         while (!ClientData.isConnected.get()) {
         }
+
+        ClientHeartbeat clientHeartbeat = new ClientHeartbeat();
+        clientHeartbeat.thread.start();
 
         System.out.println("This is client '" + clientName + "' and it can do the following: ");
 //        System.out.println("1) Send a message to other clients.");

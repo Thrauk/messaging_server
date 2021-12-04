@@ -2,10 +2,7 @@ package messaging_server.server;
 
 import messaging_server.rabbitMQ.RabbitMQConstants;
 import messaging_server.server.consumer.ServerMainConsumer;
-import messaging_server.server.routines.ServerConnectionManager;
-import messaging_server.server.routines.ServerConsole;
-import messaging_server.server.routines.ServerEventManager;
-import messaging_server.server.routines.ServerSendQueuedMessages;
+import messaging_server.server.routines.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -61,6 +58,9 @@ public class Server {
         //Initializing server's console commands
         ServerConsole serverConsole = new ServerConsole();
         threads.add(serverConsole.thread);
+
+        ServerHeartbeatCheckRoutine serverHeartbeatCheckRoutine = new ServerHeartbeatCheckRoutine();
+        threads.add(serverHeartbeatCheckRoutine.thread);
 
         //Starting all initialized threads
         for(Thread thread : threads) {

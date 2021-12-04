@@ -4,6 +4,8 @@ import messaging_server.server.config.DefaultConfig;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class ClientModel {
@@ -18,9 +20,18 @@ public class ClientModel {
         this.receivingQueue = clientId + "-receiving";
     }
 
+//    public ClientModel(ClientModel clientToCopy) {
+//        this.clientId = clientToCopy.clientId;
+//        this.receivingQueue = clientToCopy.receivingQueue;
+//        this.lastMessageReceived = clientToCopy.lastMessageReceived;
+//        this.timeout = clientToCopy.timeout;
+//        this.maximumMessageQueue = clientToCopy.maximumMessageQueue;
+//    }
+
     public ClientModel(String clientId, String receivingQueue) {
         this.clientId = clientId;
         this.receivingQueue = receivingQueue;
+        lastMessageReceived = LocalDateTime.now();
     }
 
     private String clientId;
@@ -28,6 +39,7 @@ public class ClientModel {
     private LocalDateTime lastMessageReceived;
     private int timeout = DefaultConfig.clientTimeout;
     private int maximumMessageQueue = DefaultConfig.maxMsgQueue;
+    private final List<String> partners = new ArrayList<>();
 
     public long getTimeDifference() {
         LocalDateTime now = LocalDateTime.now();
@@ -77,4 +89,19 @@ public class ClientModel {
     public void setMaximumMessageQueue(int maximumMessageQueue) {
         this.maximumMessageQueue = maximumMessageQueue;
     }
+
+    public void addPartner(String partnerId) {
+        if(!this.partners.contains(partnerId)){
+            this.partners.add(partnerId);
+        }
+    }
+
+    public void removePartner(String partnerId) {
+        this.partners.remove(partnerId);
+    }
+
+    public boolean hasPartner(String partnerId) {
+        return this.partners.contains(partnerId);
+    }
+
 }

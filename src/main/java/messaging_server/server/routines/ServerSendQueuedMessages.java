@@ -16,8 +16,8 @@ public class ServerSendQueuedMessages extends ServerRoutine {
         SimpleEventMessage jsonMessage = messageToSend.getMessage();
         String receivingQueue = messageToSend.getQueue();
         if(receivingQueue != null){
-            System.out.println("Message to send "+ JsonHelper.stringify(messageToSend.getMessage()));
-            System.out.println("Sent message on queue " + receivingQueue);
+            // System.out.println("Message to send "+ JsonHelper.stringify(messageToSend.getMessage()));
+            // System.out.println("Sent message on queue " + receivingQueue);
             serverMessageProducer.sendEventMessageOnQueue(jsonMessage, receivingQueue);
         }
     }

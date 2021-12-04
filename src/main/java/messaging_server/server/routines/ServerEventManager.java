@@ -43,11 +43,20 @@ public class ServerEventManager extends ServerRoutine {
 
         if (Objects.equals(responseEvent, MessageEvents.checkIfConnectedResponseSuccessful)) {
             SimpleEventMessage responseToPartner = new SimpleEventMessage();
+            String partnerId = message.getMessage();
+
             responseToPartner.setEventType(MessageEvents.listenForNewMessages);
             responseToPartner.setMessageSender(DefaultConfig.serverName);
             responseToPartner.setMessageReceiver(message.getMessage());
             responseToPartner.setMessage(message.getMessageSender() + "-" + message.getMessage());
+
             ServerData.messagesToSend.add(new MessageToSend(responseToPartner));
+
+
+            // The two clients are connected as partners (does not matter which direction)
+            //System.out.println("New partners are " + partnerId + " and " + clientId);
+            ServerData.connectedClients.get(partnerId).addPartner(clientId);
+            ServerData.connectedClients.get(clientId).addPartner(partnerId);
         }
     }
 }

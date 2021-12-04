@@ -33,6 +33,8 @@ public class SafeMap<K,V> {
         return new ArrayList<>(map.keySet());
     }
 
+    public ArrayList<V> exportValuesAsList() { return new ArrayList<>(map.values());}
+
     // Check if key exists in map
     public V get(K key) {
         return map.get(key);

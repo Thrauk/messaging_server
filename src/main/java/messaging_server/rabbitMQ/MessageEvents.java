@@ -10,4 +10,5 @@ public class MessageEvents {
     public static String connectionRequestResponseFailed = "connection-request-response-failed";
     public static String listenForNewMessages = "listen-for-new-messages";
     public static String receiveConnectedClientsList = "receive-connected-clients-list-from-server";
+    public static String disconnectedPartner = "disconnected-partner";
 }

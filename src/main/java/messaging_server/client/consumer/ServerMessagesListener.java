@@ -12,6 +12,7 @@ import messaging_server.rabbitMQ.MessageEvents;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 public class ServerMessagesListener extends Consumer {
     public ServerMessagesListener(String queueName) {
@@ -51,10 +52,15 @@ public class ServerMessagesListener extends Consumer {
 
                     } else if (jsonMessage.getEventType().equals(MessageEvents.listenForNewMessages)) {
                         String client = jsonMessage.getMessage().split("-")[0];
-                        PartnersMessagesConsumer consumer = new PartnersMessagesConsumer(jsonMessage.getMessage());
+
+
+
+                        PartnersMessagesConsumer consumer = new PartnersMessagesConsumer(jsonMessage.getMessage(), client);
                         consumer.thread.start();
                         ClientData.partnersMessagesConsumers.add(consumer);
                         System.out.println("Started listening for " + client + "'s messages");
+                    } else if(jsonMessage.getEventType().equals(MessageEvents.disconnectedPartner)) {
+                        partnerDisconnected(jsonMessage.getMessage());
                     }
                 }
             }, consumerTag -> {
@@ -63,5 +69,30 @@ public class ServerMessagesListener extends Consumer {
             System.out.println("Error listening " + queueName);
             e.printStackTrace();
         }
+    }
+
+    private void partnerDisconnected(String partnerId) {
+        Optional<Partner> connectedPartner = ClientData.connectedPartners
+                .exportAsList()
+                .stream()
+                .filter(partner -> partner.getPartnerId().equals(partnerId))
+                .findFirst();
+
+        connectedPartner.ifPresent(ClientData.connectedPartners::removeElement);
+
+        Optional<PartnersMessagesConsumer> connectedPartnerConsumer = ClientData.partnersMessagesConsumers
+                .exportAsList()
+                .stream()
+                .filter(partnersMessagesConsumer -> partnersMessagesConsumer.getPartnerId().equals(partnerId))
+                .findFirst();
+
+        connectedPartnerConsumer.ifPresent(partnersMessagesConsumer -> {
+            System.out.println("Partner disconnected " + partnerId);
+            partnersMessagesConsumer.closeListener();
+            partnersMessagesConsumer.thread.interrupt();
+            ClientData.partnersMessagesConsumers.removeElement(partnersMessagesConsumer);
+        });
+
+
     }
 }

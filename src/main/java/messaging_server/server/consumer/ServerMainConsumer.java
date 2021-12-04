@@ -21,15 +21,16 @@ public class ServerMainConsumer extends Consumer {
     @Override
     protected void listener() {
         try {
+            channel.queuePurge(this.queueName);
             channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
-                System.out.println("Got message");
+                //System.out.println("Got message");
 
                 timeReceived = LocalDateTime.now();
 
 
                 SimpleEventMessage jsonMessage = objectMapper.readValue(message.getBody(), SimpleEventMessage.class);
                 String sender_id = jsonMessage.getMessageSender();
-                System.out.println("Sender is " + jsonMessage.getMessageSender());
+                //System.out.println("Sender is " + jsonMessage.getMessageSender());
 
 
 

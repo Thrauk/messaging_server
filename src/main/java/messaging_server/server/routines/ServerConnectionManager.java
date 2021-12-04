@@ -21,12 +21,12 @@ public class ServerConnectionManager extends ServerRoutine {
         response.setMessageReceiver(clientId);
 
         if(!ServerData.connectedClients.exists(clientId)) {
-            System.out.println("Connection Accepted");
+            //System.out.println("Connection Accepted");
             response.setEventType(MessageEvents.connectionRequestResponseSuccessful);
             response.setMessage(MessageResponse.connectionSuccessful);
             ServerData.addClient(clientId, clientQueue);
         } else {
-            System.out.println("Connection Declined");
+            //System.out.println("Connection Declined");
             response.setEventType(MessageEvents.connectionRequestResponseFailed);
             response.setMessage(MessageResponse.connectionFailed);
         }

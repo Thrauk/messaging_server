@@ -20,8 +20,8 @@ public class ClientData {
     public static String receivingQueueServerClient;
     public static final AtomicBoolean isConnected = new AtomicBoolean(false);
     public static final SafeQueue<SimpleEventMessage> messagesToSend = new SafeQueue<>();
-    public static final List<Partner> connectedPartners = new ArrayList<>();
-    public static final List<PartnersMessagesConsumer> partnersMessagesConsumers = new ArrayList<>();
+    public static final SafeQueue<Partner> connectedPartners = new SafeQueue<>();
+    public static final SafeQueue<PartnersMessagesConsumer> partnersMessagesConsumers = new SafeQueue<>();
     public static final SafeMap<String, TopicProducer> topicPublishers = new SafeMap<>();
     public static final SafeMap<String, TopicConsumer> topicSubscriptions = new SafeMap<>();
     //public static final SafeMap<String, SafeQueue<String>> listOfMessages = new SafeMap<>();

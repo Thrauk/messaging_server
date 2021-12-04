@@ -6,16 +6,17 @@ import messaging_server.rabbitMQ.Consumer;
 import java.io.IOException;
 
 public class PartnersMessagesConsumer extends Consumer {
-    public PartnersMessagesConsumer(String queueName) {
+    public PartnersMessagesConsumer(String queueName, String partnerId) {
         super(queueName);
+        this.partnerId = partnerId;
     }
+    private String partnerId;
 
-    ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     protected void listener() {
         try {
-            channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
+            this.consumerTag = channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
                 SimpleMessage jsonMessage = objectMapper.readValue(message.getBody(), SimpleMessage.class);
                 System.out.print(jsonMessage.getMessageSender() + " sent you a message:");
                 System.out.println(jsonMessage.getMessage());
@@ -26,5 +27,13 @@ public class PartnersMessagesConsumer extends Consumer {
             System.out.println("Error listening " + queueName);
             e.printStackTrace();
         }
+    }
+
+    public void setPartnerId(String partnerId) {
+        this.partnerId = partnerId;
+    }
+
+    public String getPartnerId() {
+        return partnerId;
     }
 }
