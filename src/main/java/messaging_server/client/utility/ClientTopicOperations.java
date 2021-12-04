@@ -1,5 +1,6 @@
 package messaging_server.client.utility;
 
+import messaging_server.client.config.DefaultConfig;
 import messaging_server.client.data.ClientData;
 import messaging_server.models.JsonObject;
 import messaging_server.rabbitMQ.TopicConsumer;
@@ -19,13 +20,12 @@ public class ClientTopicOperations {
         if(ClientData.topicPublishers.exists(topicName))
         {
             publisher=ClientData.topicPublishers.get(topicName);
-            publisher.publishMessage(message);
         }
         else
         {
-            publisher=new TopicProducer(topicName);
+            publisher=new TopicProducer(topicName, DefaultConfig.topicMessageTTL);
             ClientData.topicPublishers.add(topicName,publisher);
-            publisher.publishMessage(message);
         }
+        publisher.publishMessage(message);
     }
 }
