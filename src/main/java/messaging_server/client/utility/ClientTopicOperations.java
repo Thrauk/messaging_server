@@ -7,13 +7,11 @@ import messaging_server.rabbitMQ.TopicProducer;
 
 public class ClientTopicOperations {
     public static void subscribeToTopic(String topicName) {
-        if (ClientData.topicSubscriptions.exists(topicName)) {
-            System.out.println("Already subscribed to this topic -> " + topicName);
-        } else {
+
             TopicConsumer subscription = new TopicConsumer(topicName);
             ClientData.topicSubscriptions.add(topicName,subscription);
             subscription.thread.start();
-        }
+
     }
     public static void publishToTopic(String topicName, JsonObject message)
     {
