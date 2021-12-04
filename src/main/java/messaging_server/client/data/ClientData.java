@@ -22,9 +22,13 @@ public class ClientData {
     public static final SafeQueue<SimpleEventMessage> messagesToSend = new SafeQueue<>();
     public static final List<Partner> connectedPartners = new ArrayList<>();
     public static final List<PartnersMessagesConsumer> partnersMessagesConsumers = new ArrayList<>();
-    public static final SafeMap<String, TopicProducer>  topicPublishers = new SafeMap<>();
-    public static final SafeMap<String, TopicConsumer> topicSubscriptions =new SafeMap<>();
+    public static final SafeMap<String, TopicProducer> topicPublishers = new SafeMap<>();
+    public static final SafeMap<String, TopicConsumer> topicSubscriptions = new SafeMap<>();
+    //public static final SafeMap<String, SafeQueue<String>> listOfMessages = new SafeMap<>();
+
     public static void setReceivingQueueServerClient() {
         ClientData.receivingQueueServerClient = clientId + "-" + UUID.randomUUID();
     }
+
+
 }
