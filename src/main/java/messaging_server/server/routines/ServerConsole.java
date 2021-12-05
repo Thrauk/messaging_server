@@ -40,7 +40,6 @@ public class ServerConsole extends ServerRoutine{
         System.out.println("1)Show connected clients");
         System.out.println("2)Configure a client");
         System.out.println("3)Show active topics");
-        System.out.println("4)Configure a topic");
 
         System.out.println("Enter your choice:");
     }
@@ -50,7 +49,6 @@ public class ServerConsole extends ServerRoutine{
         boolean valueOk = true;
         int selectedOption = 0;
         do {
-
             try
             {
                 selectedOption = Integer.parseInt(reader.readLine());
@@ -81,9 +79,6 @@ public class ServerConsole extends ServerRoutine{
                     showActiveTopics();
                     break;
 
-                case 4:
-                    configureTopic();
-                    break;
 
 
                 default:
@@ -208,10 +203,6 @@ public class ServerConsole extends ServerRoutine{
 
     }
 
-    private void configureTopic()
-    {
-
-    }
 
     private void clientConfigurationMenu(ClientModel client)
     {
