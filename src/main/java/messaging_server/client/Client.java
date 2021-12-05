@@ -63,7 +63,7 @@ public class Client {
         ClientHeartbeat clientHeartbeat = new ClientHeartbeat();
         clientHeartbeat.thread.start();
 
-    //    while(!this.thread.isInterrupted())
+      // while(!this.thread.isInterrupted())
         {
             clientMenu();
         }
@@ -118,6 +118,12 @@ public class Client {
 
                 case 4:
                 {
+                    createTopic();
+
+                }break;
+
+                case 5:
+                {
                     configureTopicTTL();
                 }break;
 
@@ -141,7 +147,8 @@ public class Client {
         System.out.println("1) Send a message to other clients.");
         System.out.println("2) Read/Subscribe to a specific topic.");
         System.out.println("3) Publish on a topic.");
-        System.out.println("4) Configure default topic message TTL");
+        System.out.println("4) Create a new topic.");
+        System.out.println("5) Configure default topic message TTL");
 
         System.out.println("What do you want to do? Enter an option:");
 
@@ -163,7 +170,6 @@ public class Client {
 
         }
 
-        ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
     }
 
     public void readSpecificTopic()
@@ -190,6 +196,7 @@ public class Client {
         {
             ClientTopicOperations.subscribeToTopic(topicName);
         }
+        clientMenu();
 
     }
 
@@ -197,37 +204,46 @@ public class Client {
     {
         System.out.println("Write topic's to subscribe name:");
         String topicName = null;
-
         try {
-
             topicName = reader.readLine();
-
         } catch (IOException e) {
-
             e.printStackTrace();
-            System.out.println("Reading error");
-
         }
-
         System.out.println("Write message: ");
         String message = null;
-
         try {
-
             message = reader.readLine();
-
         } catch (IOException e) {
-
             e.printStackTrace();
-            System.out.println("Reading error");
-
         }
+        SimpleMessage sm=new SimpleMessage();
+        sm.setMessage(message);
+        sm.setMessageReceiver("");
+        sm.setMessageSender(ClientData.clientId);
+        ClientTopicOperations.publishToTopic(topicName, sm);
+
+        clientMenu();
+    }
+
+    public void createTopic()
+    {
+        System.out.println("Write topic's name:");
+        String topicName = null;
+        try {
+            topicName = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String message = "";
 
         SimpleMessage sm=new SimpleMessage();
         sm.setMessage(message);
         sm.setMessageReceiver("");
         sm.setMessageSender(ClientData.clientId);
         ClientTopicOperations.publishToTopic(topicName, sm);
+
+        clientMenu();
     }
 
     public void configureTopicTTL()
