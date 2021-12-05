@@ -50,10 +50,6 @@ public class Client {
         ServerMessagesListener serverMessagesListener = new ServerMessagesListener(ClientData.receivingQueueServerClient);
         serverMessagesListener.thread.start();
 
-        for (var consumer : ClientData.partnersMessagesConsumers.exportAsList()) {
-            consumer.thread.start();
-        }
-
 
         System.out.println("Waiting for server response...");
 
