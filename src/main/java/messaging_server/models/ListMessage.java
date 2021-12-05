@@ -49,4 +49,16 @@ public class ListMessage extends JsonObject{
     public void setEventType(String eventType) {
         this.eventType = eventType;
     }
+
+    public String getMessageAsString()
+    {
+        String aux ="";
+
+        for(String iter: message)
+        {
+            aux = aux +iter+'\n';
+        }
+
+        return aux;
+    }
 }

@@ -123,6 +123,11 @@ public class Client {
                     configureTopicTTL();
                 }break;
 
+                case 6:
+                {
+                    requestClientList();
+                }break;
+
                 default:
                 {
                     System.out.println("Selected option is not available, please choose again: ");
@@ -144,7 +149,8 @@ public class Client {
         System.out.println("2) Read/Subscribe to a specific topic.");
         System.out.println("3) Publish on a topic.");
         System.out.println("4) Create a new topic.");
-        System.out.println("5) Configure default topic message TTL");
+        System.out.println("5) Configure default topic message TTL.");
+        System.out.println("6) Request connected clients list from server.");
 
         System.out.println("What do you want to do? Enter an option:");
 
@@ -245,6 +251,20 @@ public class Client {
     public void configureTopicTTL()
     {
         //To Be Added
+    }
+
+    public void requestClientList()
+    {
+        SimpleEventMessage message = new SimpleEventMessage();
+        message.setMessageReceiver(RabbitMQConstants.serverId);
+        message.setMessageSender(clientName);
+        message.setMessage("");
+        message.setEventType(MessageEvents.requestConnectedClientsList);
+
+        ClientServerMessageSender.sendServerRequest(message);
+
+        while(!ClientData.gotResponse.get()){}
+
     }
 
     public void clientRoutineTest() {

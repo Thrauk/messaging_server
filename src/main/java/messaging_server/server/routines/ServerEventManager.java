@@ -1,8 +1,10 @@
 package messaging_server.server.routines;
 
+import messaging_server.models.ListMessage;
 import messaging_server.models.SimpleEventMessage;
 import messaging_server.rabbitMQ.MessageEvents;
 import messaging_server.rabbitMQ.MessageResponse;
+import messaging_server.rabbitMQ.RabbitMQConstants;
 import messaging_server.server.data.ServerData;
 import messaging_server.server.config.DefaultConfig;
 import messaging_server.server.models.MessageToSend;
@@ -19,6 +21,13 @@ public class ServerEventManager extends ServerRoutine {
         if (eventType.equals(MessageEvents.checkIfConnected)) {
             checkIfConnected(message);
         }
+
+        if (eventType.equals(MessageEvents.requestConnectedClientsList)) {
+
+            ListMessage connectedClientsMessage = new ListMessage(RabbitMQConstants.serverId,message.getMessageSender(),ServerData.connectedClients.exportKeysAsList(),MessageEvents.receiveConnectedClientsList);
+            ServerData.messagesToSend.add(new MessageToSend(connectedClientsMessage));
+        }
+
 
     }
 

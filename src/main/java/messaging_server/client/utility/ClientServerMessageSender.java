@@ -28,4 +28,9 @@ public class ClientServerMessageSender {
 
     }
 
+    public static void sendServerRequest(SimpleEventMessage msg)
+    {
+        jsonMessageProducer.sendEventMessageOnQueue(msg, RabbitMQConstants.serverReceivingQueue);
+    }
+
 }
