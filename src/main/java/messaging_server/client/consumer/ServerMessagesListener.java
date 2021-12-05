@@ -39,7 +39,8 @@ public class ServerMessagesListener extends Consumer {
                         String receivedMessage = jsonMessage.getMessage();
                         String partnerUid = receivedMessage.split("-")[1];
                         System.out.println("Client " + partnerUid + " is connected");
-                        ClientData.connectedPartners.add(new Partner(partnerUid, receivedMessage));
+//                        ClientData.connectedPartners.add(new Partner(partnerUid, receivedMessage));
+                        ClientData.addOrSetPartnerQueue(partnerUid, receivedMessage);
 
                         // to be moved in a function
                         System.out.print("Write message to send:");
@@ -56,8 +57,10 @@ public class ServerMessagesListener extends Consumer {
 
 
                         PartnersMessagesConsumer consumer = new PartnersMessagesConsumer(jsonMessage.getMessage(), client);
+
                         consumer.thread.start();
-                        ClientData.partnersMessagesConsumers.add(consumer);
+//                        ClientData.partnersMessagesConsumers.add(consumer);
+                        ClientData.addOrSetPartnerListener(client, consumer);
                         System.out.println("Started listening for " + client + "'s messages");
                     } else if(jsonMessage.getEventType().equals(MessageEvents.disconnectedPartner)) {
                         partnerDisconnected(jsonMessage.getMessage());
@@ -72,27 +75,29 @@ public class ServerMessagesListener extends Consumer {
     }
 
     private void partnerDisconnected(String partnerId) {
+        //System.out.println("Partner disconnected " + partnerId);
         Optional<Partner> connectedPartner = ClientData.connectedPartners
                 .exportAsList()
                 .stream()
                 .filter(partner -> partner.getPartnerId().equals(partnerId))
                 .findFirst();
 
-        connectedPartner.ifPresent(ClientData.connectedPartners::removeElement);
-
-        Optional<PartnersMessagesConsumer> connectedPartnerConsumer = ClientData.partnersMessagesConsumers
-                .exportAsList()
-                .stream()
-                .filter(partnersMessagesConsumer -> partnersMessagesConsumer.getPartnerId().equals(partnerId))
-                .findFirst();
-
-        connectedPartnerConsumer.ifPresent(partnersMessagesConsumer -> {
-            System.out.println("Partner disconnected " + partnerId);
-            partnersMessagesConsumer.closeListener();
-            partnersMessagesConsumer.thread.interrupt();
-            ClientData.partnersMessagesConsumers.removeElement(partnersMessagesConsumer);
+        connectedPartner.ifPresent(partner -> {
+            partner.getPartnersMessagesConsumer().closeListener();
+            ClientData.connectedPartners.removeElement(partner);
         });
 
+//        Optional<PartnersMessagesConsumer> connectedPartnerConsumer = ClientData.partnersMessagesConsumers
+//                .exportAsList()
+//                .stream()
+//                .filter(partnersMessagesConsumer -> partnersMessagesConsumer.getPartnerId().equals(partnerId))
+//                .findFirst();
 
+//        connectedPartnerConsumer.ifPresent(partnersMessagesConsumer -> {
+//            System.out.println("Partner disconnected " + partnerId);
+//            partnersMessagesConsumer.closeListener();
+//            partnersMessagesConsumer.thread.interrupt();
+//            ClientData.partnersMessagesConsumers.removeElement(partnersMessagesConsumer);
+//        });
     }
 }

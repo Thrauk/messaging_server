@@ -1,16 +1,22 @@
 package messaging_server.client.models;
 
+import messaging_server.client.consumer.PartnersMessagesConsumer;
+
 public class Partner {
     public Partner() {
         this.partnerId = "";
-        this.receivingQueue = "";
         this.sendingQueue = "";
     }
 
-    public Partner(String partnerId, String receivingQueue, String sendingQueue) {
+    public Partner(String partnerId, PartnersMessagesConsumer partnersMessagesConsumer, String sendingQueue) {
         this.partnerId = partnerId;
-        this.receivingQueue = receivingQueue;
+        this.partnersMessagesConsumer = partnersMessagesConsumer;
         this.sendingQueue = sendingQueue;
+    }
+
+    public Partner(String partnerId, PartnersMessagesConsumer partnersMessagesConsumer) {
+        this.partnerId = partnerId;
+        this.partnersMessagesConsumer = partnersMessagesConsumer;
     }
 
 
@@ -20,7 +26,7 @@ public class Partner {
     }
 
     private String partnerId;
-    private String receivingQueue;
+    private PartnersMessagesConsumer partnersMessagesConsumer = null;
     private String sendingQueue;
 
     public String getPartnerId() {
@@ -31,13 +37,6 @@ public class Partner {
         this.partnerId = partnerId;
     }
 
-    public String getReceivingQueue() {
-        return receivingQueue;
-    }
-
-    public void setReceivingQueue(String receivingQueue) {
-        this.receivingQueue = receivingQueue;
-    }
 
     public String getSendingQueue() {
         return sendingQueue;
@@ -45,5 +44,16 @@ public class Partner {
 
     public void setSendingQueue(String sendingQueue) {
         this.sendingQueue = sendingQueue;
+    }
+
+
+    public PartnersMessagesConsumer getPartnersMessagesConsumer() {
+        return partnersMessagesConsumer;
+    }
+
+    public void setPartnersMessagesConsumer(PartnersMessagesConsumer partnersMessagesConsumer) {
+        if (this.partnersMessagesConsumer == null) {
+            this.partnersMessagesConsumer = partnersMessagesConsumer;
+        }
     }
 }
