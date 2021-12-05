@@ -48,7 +48,7 @@ public class ServerMessagesListener extends Consumer {
 
                     } else if (jsonMessage.getEventType().equals(MessageEvents.checkIfConnectedResponseFailed)) {
                         System.out.println("Client is not connected, try again");
-                        Client.showMenu();
+                        //Client.showMenu();
 
                     } else if (jsonMessage.getEventType().equals(MessageEvents.listenForNewMessages)) {
                         String client = jsonMessage.getMessage().split("-")[0];

@@ -46,13 +46,7 @@ public class App2 {
 
         ConnectionManager.createConnection();
 
-        Thread clientThread = new Thread(() -> {
-            try {
-                client.consoleRoutine();
-            } catch(IOException v) {
-                System.out.println(v);
-            }
-        });
+        Thread clientThread = new Thread(client::consoleRoutine);
 
         clientThread.start();
 

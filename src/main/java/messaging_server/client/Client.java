@@ -21,17 +21,26 @@ import java.util.concurrent.TimeUnit;
 
 public class Client {
 
-    private String clientName;
-
-    static int selectedOption;
+    private static String clientName = "";
 
     public static BufferedReader reader =
             new BufferedReader(new InputStreamReader(System.in));
 
-    public void consoleRoutine() throws IOException {
+    public Thread thread = new Thread(this::consoleRoutine);
+
+    public void consoleRoutine() {
 
         System.out.println("Enter a name for the client: ");
-        clientName = reader.readLine();
+
+        try
+        {
+            clientName = reader.readLine();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            System.out.println("Error while reading client's name");
+        }
 
         ClientData.clientId = clientName;
         ClientData.setReceivingQueueServerClient();
@@ -45,7 +54,6 @@ public class Client {
             consumer.thread.start();
         }
 
-        //System.out.flush();
 
         System.out.println("Waiting for server response...");
 
@@ -55,84 +63,177 @@ public class Client {
         ClientHeartbeat clientHeartbeat = new ClientHeartbeat();
         clientHeartbeat.thread.start();
 
-        System.out.println("This is client '" + clientName + "' and it can do the following: ");
-//        System.out.println("1) Send a message to other clients.");
-//        System.out.println("2) Read/Subscribe to a specific topic.");
-//        System.out.println("3) Publish on a topic.");
-//        System.out.println("What do you want to do? Enter an option:");
+    //    while(!this.thread.isInterrupted())
+        {
+            clientMenu();
+        }
 
+    }
+
+    public void clientMenu()
+    {
         showMenu();
 
-//        int selectedOption;
-//
-//        do{
-//            selectedOption = Integer.parseInt(reader.readLine());
-//            if(selectedOption < 1 || selectedOption > 3)
-//            {
-//                System.out.println("Selected option is not available, please choose again: ");
-//            }
-//            if(selectedOption == 2) {
-//                System.out.println("Write client's name:");
-//                String partnerName = reader.readLine();
-//                ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
-//
-//            }
-//        }while(selectedOption < 1 || selectedOption > 3);
+        int selectedOption = 0;
 
-    }
+        boolean valueOk = true;
 
-    public static void showMenu() throws IOException {
-        do {
-            System.out.println("1) Send a message to other clients.");
-            System.out.println("2) Read/Subscribe to a specific topic.");
-            System.out.println("3) Publish on a topic.");
-            System.out.println("What do you want to do? Enter an option:");
+        do{
 
-            selectedOption = Integer.parseInt(reader.readLine());
-            if (selectedOption < 1 || selectedOption > 3) {
-                System.out.println("Selected option is not available, please choose again: ");
-            }
-            if (selectedOption == 1) {
-                System.out.println("Write client's name:");
-                String partnerName = reader.readLine();
-                ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
-            }
-            if (selectedOption==2)
+            selectedOption = 0;
+
+            try
             {
-                System.out.println("Write topic name: ");
-                String topicName=reader.readLine();
+                selectedOption = Integer.parseInt(reader.readLine());
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+                System.out.println("Reading error");
+            }
+            catch (NumberFormatException e)
+            {
+                e.printStackTrace();
+                System.out.println("Invalid character");
+            }
 
-                if(ClientData.topicSubscriptions.exists(topicName))
+            valueOk = true;
+
+            switch(selectedOption)
+            {
+                case 1:
                 {
-                    TopicConsumer tc =ClientData.topicSubscriptions.get(topicName);
-                    //TopicConsumer nume =ClientData.topicSubscriptions.get(topicName)
-                    //metoda(nume.savedMessages)
-                    /*
-                           afisare de mesaje de pe topic iar in metoda  metoda facem pop de mesajele din lista pentru a afisa o singura data
-                     */
-                    tc.getMessagesFromTopic();
-                }
-                else
+                    sendMessageToOtherClients();
+                }break;
+
+                case 2:
                 {
-                    ClientTopicOperations.subscribeToTopic(topicName);
+                    readSpecificTopic();
+                }break;
+
+                case 3:
+                {
+                    publishOnTopic();
+                }break;
+
+                case 4:
+                {
+                    configureTopicTTL();
+                }break;
+
+                default:
+                {
+                    System.out.println("Selected option is not available, please choose again: ");
+                    showMenu();
+                    valueOk = false;
                 }
-                showMenu();
             }
-            if (selectedOption == 3) {
-                System.out.println("Write topic's to subscribe name:");
-                String topicName = reader.readLine();
-                System.out.println("Write message: ");
-                String message = reader.readLine();
-                SimpleMessage sm=new SimpleMessage();
-                sm.setMessage(message);
-                sm.setMessageReceiver("");
-                sm.setMessageSender(ClientData.clientId);
-                ClientTopicOperations.publishToTopic(topicName, sm);
-                showMenu();
-            }
-        } while (selectedOption < 1 || selectedOption > 3);
+
+        }while(!valueOk);
+
+
     }
 
+    public static void showMenu() {
+
+        System.out.println("This is client '" + clientName + "' and it can do the following: ");
+
+        System.out.println("1) Send a message to other clients.");
+        System.out.println("2) Read/Subscribe to a specific topic.");
+        System.out.println("3) Publish on a topic.");
+        System.out.println("4) Configure default topic message TTL");
+
+        System.out.println("What do you want to do? Enter an option:");
+
+    }
+
+    public void sendMessageToOtherClients()
+    {
+        System.out.println("Write client's name:");
+        String partnerName = null;
+
+        try {
+
+            partnerName = reader.readLine();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            System.out.println("Reading error");
+
+        }
+
+        ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
+    }
+
+    public void readSpecificTopic()
+    {
+        System.out.println("Write topic name: ");
+        String topicName= null;
+        try {
+
+            topicName = reader.readLine();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            System.out.println("Reading error");
+
+        }
+
+        if(ClientData.topicSubscriptions.exists(topicName))
+        {
+            TopicConsumer tc =ClientData.topicSubscriptions.get(topicName);
+            tc.getMessagesFromTopic();
+        }
+        else
+        {
+            ClientTopicOperations.subscribeToTopic(topicName);
+        }
+
+    }
+
+    public void publishOnTopic()
+    {
+        System.out.println("Write topic's to subscribe name:");
+        String topicName = null;
+
+        try {
+
+            topicName = reader.readLine();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            System.out.println("Reading error");
+
+        }
+
+        System.out.println("Write message: ");
+        String message = null;
+
+        try {
+
+            message = reader.readLine();
+
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            System.out.println("Reading error");
+
+        }
+
+        SimpleMessage sm=new SimpleMessage();
+        sm.setMessage(message);
+        sm.setMessageReceiver("");
+        sm.setMessageSender(ClientData.clientId);
+        ClientTopicOperations.publishToTopic(topicName, sm);
+    }
+
+    public void configureTopicTTL()
+    {
+        //To Be Added
+    }
 
     public void clientRoutineTest() {
         ServerMessagesListener serverMessagesListener = new ServerMessagesListener(this.clientName + "-receiver");

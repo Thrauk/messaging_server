@@ -43,15 +43,7 @@ public class App {
 
         ConnectionManager.createConnection();
 
-        Thread clientThread = new Thread(() -> {
-            try {
-                client.consoleRoutine();
-            } catch(IOException v) {
-                System.out.println(v);
-            }
-        });
-
-        clientThread.start();
+        client.thread.start();
 
     }
 
