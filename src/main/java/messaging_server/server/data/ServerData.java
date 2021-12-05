@@ -21,7 +21,7 @@ public class ServerData {
     public static final SafeQueue<SimpleEventMessage> incomingConnectionRequests = new SafeQueue<>();
 
     public static final SafeQueue<String> disconnectedClients = new SafeQueue<>();
-
+    public static final SafeMap<String, SafeQueue<String>> topicSubscribers = new SafeMap<>();
     public static String getConnectedClientQueue(String clientId) {
         ClientModel client = connectedClients.get(clientId);
         if(client != null) {
@@ -46,6 +46,13 @@ public class ServerData {
             ServerData.messagesToSend.add(new MessageToSend(new DisconnectedPartner(disconnectedId, clientModel.getClientId())));
         }
 
+    }
+    public static void deleteSubscriberFromTopics(String subID)
+    {
+        for(SafeQueue<String> x:topicSubscribers.exportValuesAsList())
+        {
+            x.removeElement(subID);
+        }
     }
 
 

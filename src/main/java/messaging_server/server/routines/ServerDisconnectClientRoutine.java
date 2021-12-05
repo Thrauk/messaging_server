@@ -8,5 +8,6 @@ public class ServerDisconnectClientRoutine extends ServerRoutine {
         String disconnectedClientId = ServerData.disconnectedClients.popExisting();
         //System.out.println("HERE ABOUT " + disconnectedClientId);
         ServerData.notifyDisconnectedPartner(disconnectedClientId);
+        ServerData.deleteSubscriberFromTopics(disconnectedClientId);
     }
 }

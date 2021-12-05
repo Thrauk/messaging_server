@@ -6,6 +6,7 @@ import messaging_server.rabbitMQ.MessageResponse;
 import messaging_server.server.data.ServerData;
 import messaging_server.server.config.DefaultConfig;
 import messaging_server.server.models.MessageToSend;
+import messaging_server.structures.SafeQueue;
 
 import java.util.Objects;
 
@@ -19,6 +20,21 @@ public class ServerEventManager extends ServerRoutine {
         if (eventType.equals(MessageEvents.checkIfConnected)) {
             checkIfConnected(message);
         }
+        else if(eventType.equals(MessageEvents.userSubscribeToTopic)) {
+            String topicName= message.getMessage();
+            String clientID=message.getMessageSender();
+            if(ServerData.topicSubscribers.exists(topicName))
+            {
+                ServerData.topicSubscribers.get(topicName).add(clientID);
+            }
+            else
+            {
+                SafeQueue<String> subscribers=new SafeQueue<>();
+                subscribers.add(clientID);
+                ServerData.topicSubscribers.add(topicName,subscribers);
+            }
+        }
+
 
     }
 

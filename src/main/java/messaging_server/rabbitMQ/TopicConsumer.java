@@ -21,10 +21,14 @@ public class TopicConsumer extends Consumer {
 
     @Override
     protected void listener() {
-
+        try {
+            channel.exchangeDeclare(this.topicName, "fanout");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         try {
             channel.queueBind(queueName, topicName, "");
-            channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
+            this.consumerTag=channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
                 SimpleMessage jsonMessage = objectMapper.readValue(message.getBody(), SimpleMessage.class);
                 //System.out.println("Message on topic (" + topicName + ") from: " + jsonMessage.getMessageSender() + "--> " + jsonMessage.getMessage());
                 savedMessages.add(jsonMessage);

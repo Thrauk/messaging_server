@@ -43,6 +43,7 @@ public class ServerHeartbeatCheckRoutine extends ServerRoutine {
                 System.out.println("Client " + clientModel.getClientId() + " failed to respond. Disconnecting.");
                 ServerData.disconnectedClients.add(clientModel.getClientId());
                 ServerData.connectedClients.removeElementByKey(clientModel.getClientId());
+
             }
         }
         try {
