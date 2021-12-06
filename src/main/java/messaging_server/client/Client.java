@@ -156,10 +156,19 @@ public class Client {
 
         try {
             String partnerName = reader.readLine();
-            ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
-            while (!ClientData.waitForResponseBool.get());
+            Optional<Partner> maybePartner = ClientData.connectedPartners
+                    .exportAsList()
+                    .stream()
+                    .filter((e) -> e.getPartnerId()
+                            .equals(partnerName)).findFirst();
+            if (maybePartner.isPresent() && maybePartner.get().getSendingQueue().length() > 0) {
+                ServerMessagesListener.sendMessage(maybePartner.get().getSendingQueue(), partnerName);
+            } else {
+                ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
+                while (!ClientData.waitForResponseBool.get()) ;
 
-            ClientData.waitForResponseBool.compareAndSet(true, false);
+                ClientData.waitForResponseBool.compareAndSet(true, false);
+            }
         } catch (IOException e) {
 
             e.printStackTrace();

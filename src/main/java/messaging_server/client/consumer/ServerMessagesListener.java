@@ -42,7 +42,6 @@ public class ServerMessagesListener extends Consumer {
                         sendMessage(receivedMessage, partnerUid);
                         ClientData.waitForResponseBool.compareAndSet(false, true);
 
-
                     } else if (jsonMessage.getEventType().equals(MessageEvents.checkIfConnectedResponseFailed)) {
                         System.out.println("Client is not connected, try again");
                         ClientData.waitForResponseBool.compareAndSet(false, true);
@@ -80,19 +79,6 @@ public class ServerMessagesListener extends Consumer {
             partner.getPartnersMessagesConsumer().closeListener();
             ClientData.connectedPartners.removeElement(partner);
         });
-
-//        Optional<PartnersMessagesConsumer> connectedPartnerConsumer = ClientData.partnersMessagesConsumers
-//                .exportAsList()
-//                .stream()
-//                .filter(partnersMessagesConsumer -> partnersMessagesConsumer.getPartnerId().equals(partnerId))
-//                .findFirst();
-
-//        connectedPartnerConsumer.ifPresent(partnersMessagesConsumer -> {
-//            System.out.println("Partner disconnected " + partnerId);
-//            partnersMessagesConsumer.closeListener();
-//            partnersMessagesConsumer.thread.interrupt();
-//            ClientData.partnersMessagesConsumers.removeElement(partnersMessagesConsumer);
-//        });
     }
 
     public static void sendMessage(String queue, String partner) {
