@@ -22,6 +22,7 @@ public class ServerData {
 
     public static final SafeQueue<String> disconnectedClients = new SafeQueue<>();
     public static final SafeMap<String, SafeQueue<String>> topicSubscribers = new SafeMap<>();
+    public static final SafeQueue<String> topicList=new SafeQueue<>();
     public static String getConnectedClientQueue(String clientId) {
         ClientModel client = connectedClients.get(clientId);
         if(client != null) {

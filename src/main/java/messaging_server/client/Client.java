@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
+import static messaging_server.rabbitMQ.MessageEvents.messageOnTopic;
+
 
 public class Client {
 
@@ -243,7 +245,13 @@ public class Client {
         sm.setMessage(message);
         sm.setMessageReceiver("");
         sm.setMessageSender(ClientData.clientId);
-        ClientTopicOperations.publishToTopic(topicName, sm);
+        if(!ClientData.topicPublishers.exists(topicName)) {
+            ClientTopicOperations.publishToTopic(topicName, sm);
+        }
+        else
+        {
+            System.out.println("Topic ["+topicName+"] exists.");
+        }
 
         clientMenu();
     }

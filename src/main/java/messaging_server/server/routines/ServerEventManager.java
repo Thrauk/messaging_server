@@ -5,6 +5,7 @@ import messaging_server.models.SimpleEventMessage;
 import messaging_server.rabbitMQ.MessageEvents;
 import messaging_server.rabbitMQ.MessageResponse;
 import messaging_server.rabbitMQ.RabbitMQConstants;
+import messaging_server.server.Server;
 import messaging_server.server.data.ServerData;
 import messaging_server.server.config.DefaultConfig;
 import messaging_server.server.models.MessageToSend;
@@ -21,26 +22,31 @@ public class ServerEventManager extends ServerRoutine {
 
         if (eventType.equals(MessageEvents.checkIfConnected)) {
             checkIfConnected(message);
-        }
-        else if(eventType.equals(MessageEvents.userSubscribeToTopic)) {
-            String topicName= message.getMessage();
-            String clientID=message.getMessageSender();
-            if(ServerData.topicSubscribers.exists(topicName))
-            {
+        } else if (eventType.equals(MessageEvents.userSubscribeToTopic)) {
+            String topicName = message.getMessage();
+            String clientID = message.getMessageSender();
+            if (ServerData.topicSubscribers.exists(topicName)) {
                 ServerData.topicSubscribers.get(topicName).add(clientID);
-            }
-            else
-            {
-                SafeQueue<String> subscribers=new SafeQueue<>();
+            } else {
+                SafeQueue<String> subscribers = new SafeQueue<>();
                 subscribers.add(clientID);
-                ServerData.topicSubscribers.add(topicName,subscribers);
+                ServerData.topicSubscribers.add(topicName, subscribers);
+            }
+        }
+        //if a message is sent on a topic the server receives an event with the topicName and adds it to its list of Topics
+        if (eventType.equals(MessageEvents.messageOnTopic)) {
+            String topicName = message.getMessage();
+            if (!ServerData.topicList.exists(topicName)) {
+                ServerData.topicList.add(topicName);
+            } else {
+                System.out.println("Message posted on [" + topicName + "] topic.");
             }
         }
 
 
         if (eventType.equals(MessageEvents.requestConnectedClientsList)) {
 
-            ListMessage connectedClientsMessage = new ListMessage(RabbitMQConstants.serverId,message.getMessageSender(),ServerData.connectedClients.exportKeysAsList(),MessageEvents.receiveConnectedClientsList);
+            ListMessage connectedClientsMessage = new ListMessage(RabbitMQConstants.serverId, message.getMessageSender(), ServerData.connectedClients.exportKeysAsList(), MessageEvents.receiveConnectedClientsList);
             ServerData.messagesToSend.add(new MessageToSend(connectedClientsMessage));
         }
 
