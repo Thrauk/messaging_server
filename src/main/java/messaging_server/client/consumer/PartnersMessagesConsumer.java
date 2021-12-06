@@ -8,7 +8,7 @@ import messaging_server.structures.SafeQueue;
 import java.io.IOException;
 
 public class PartnersMessagesConsumer extends Consumer {
-    SafeQueue<SimpleMessage> receivedMessages = new SafeQueue();
+    SafeQueue<SimpleMessage> receivedMessages = new SafeQueue<>();
 
     public PartnersMessagesConsumer(String queueName, String partnerId) {
         super(queueName);
