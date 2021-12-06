@@ -27,6 +27,8 @@ public class ClientData {
     public static final SafeMap<String, TopicConsumer> topicSubscriptions = new SafeMap<>();
     //public static final SafeMap<String, SafeQueue<String>> listOfMessages = new SafeMap<>();
 
+    public static final AtomicBoolean gotResponse = new AtomicBoolean(false);
+
     public static void setReceivingQueueServerClient() {
         ClientData.receivingQueueServerClient = clientId + "-" + UUID.randomUUID();
     }

@@ -65,6 +65,11 @@ public class ServerMessagesListener extends Consumer {
                     } else if(jsonMessage.getEventType().equals(MessageEvents.disconnectedPartner)) {
                         partnerDisconnected(jsonMessage.getMessage());
                     }
+                    else if(jsonMessage.getEventType().equals(MessageEvents.receiveConnectedClientsList))
+                    {
+                        System.out.println(jsonMessage.getMessage());
+                        ClientData.gotResponse.compareAndSet(false,true);
+                    }
                 }
             }, consumerTag -> {
             });
