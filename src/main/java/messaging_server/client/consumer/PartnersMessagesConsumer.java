@@ -39,9 +39,9 @@ public class PartnersMessagesConsumer extends Consumer {
         SimpleMessage simpleMessage = receivedMessages.pop();
 
         if (simpleMessage != null) {
+            System.out.print(simpleMessage.getMessageSender() + ": ");
             System.out.println(simpleMessage.getMessage());
         }
-
     }
 
     public void setPartnerId(String partnerId) {

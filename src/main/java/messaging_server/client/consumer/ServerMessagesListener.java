@@ -53,7 +53,6 @@ public class ServerMessagesListener extends Consumer {
                         PartnersMessagesConsumer consumer = new PartnersMessagesConsumer(jsonMessage.getMessage(), client);
                         consumer.thread.start();
                         ClientData.addOrSetPartnerListener(client, consumer);
-                        System.out.println("Started listening for " + client + "'s messages");
                     } else if (jsonMessage.getEventType().equals(MessageEvents.disconnectedPartner)) {
                         partnerDisconnected(jsonMessage.getMessage());
                     } else if (jsonMessage.getEventType().equals(MessageEvents.receiveConnectedClientsList)) {
@@ -96,15 +95,17 @@ public class ServerMessagesListener extends Consumer {
 //        });
     }
 
-    public void sendMessage(String queue, String partner) {
+    public static void sendMessage(String queue, String partner) {
         System.out.println("Write messages. Enter 'EXIT' to return to main menu.");
 
         String message;
         try {
+            System.out.print(ClientData.clientId + ": ");
             message = Client.reader.readLine();
 
             while (!message.equals("EXIT")) {
                 ClientToClientMessageSender.sendMessage(queue, partner, message);
+                System.out.print(ClientData.clientId + ": ");
                 message = Client.reader.readLine();
             }
         } catch (IOException e) {

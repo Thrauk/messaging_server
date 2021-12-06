@@ -152,29 +152,26 @@ public class Client {
     }
 
     public void sendMessageToOtherClients() {
-        System.out.println("Write client's name:");
-        String partnerName = null;
+        System.out.print("Write client's name: ");
 
         try {
-            partnerName = reader.readLine();
+            String partnerName = reader.readLine();
             ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
-            while (!ClientData.waitForResponseBool.get()) {
-            }
-//            clientMenu();
+            while (!ClientData.waitForResponseBool.get());
+
             ClientData.waitForResponseBool.compareAndSet(true, false);
         } catch (IOException e) {
 
             e.printStackTrace();
             System.out.println("Reading error");
-
         }
-
     }
 
     public void readMessagesFromClients() {
         System.out.print("Connected clients: ");
-        ClientData.connectedPartners.exportAsList().forEach((e) -> System.out.println(e.getPartnerId()));
-        System.out.println("Write client's name");
+        ClientData.connectedPartners.exportAsList().forEach((e) -> System.out.print(e.getPartnerId() + " "));
+        System.out.println();
+        System.out.print("Write client's name: ");
 
         try {
             var ref = new Object() {
@@ -188,6 +185,8 @@ public class Client {
 
 //            partner.get().getPartnersMessagesConsumer().displayMessages();
             if (partner.isPresent()) {
+                System.out.println("Incoming messages from " + partner.get().getPartnerId() + ". Write 'EXIT' to return to main menu.");
+
                 DirectMessageDisplay directMessageDisplay = new DirectMessageDisplay(partner.get());
                 directMessageDisplay.thread.start();
 
@@ -196,7 +195,7 @@ public class Client {
                     message = reader.readLine();
                 }
                 directMessageDisplay.thread.interrupt();
-                while (directMessageDisplay.thread.isAlive());
+                while (directMessageDisplay.thread.isAlive()) ;
             }
 
         } catch (IOException e) {
