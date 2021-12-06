@@ -7,11 +7,9 @@ import messaging_server.client.utility.ClientToClientMessageSender;
 import messaging_server.models.SimpleEventMessage;
 import messaging_server.rabbitMQ.Consumer;
 import messaging_server.client.data.ClientData;
-import messaging_server.models.SimpleMessage;
 import messaging_server.rabbitMQ.MessageEvents;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 public class ServerMessagesListener extends Consumer {
@@ -39,36 +37,28 @@ public class ServerMessagesListener extends Consumer {
                         String receivedMessage = jsonMessage.getMessage();
                         String partnerUid = receivedMessage.split("-")[1];
                         System.out.println("Client " + partnerUid + " is connected");
-//                        ClientData.connectedPartners.add(new Partner(partnerUid, receivedMessage));
                         ClientData.addOrSetPartnerQueue(partnerUid, receivedMessage);
 
-                        // to be moved in a function
-                        System.out.print("Write message to send:");
-                        String messageToSend = Client.reader.readLine();
-                        ClientToClientMessageSender.sendMessage(receivedMessage, partnerUid, messageToSend);
+                        sendMessage(receivedMessage, partnerUid);
+                        ClientData.waitForResponseBool.compareAndSet(false, true);
+
 
                     } else if (jsonMessage.getEventType().equals(MessageEvents.checkIfConnectedResponseFailed)) {
                         System.out.println("Client is not connected, try again");
-                        //Client.showMenu();
+                        ClientData.waitForResponseBool.compareAndSet(false, true);
 
                     } else if (jsonMessage.getEventType().equals(MessageEvents.listenForNewMessages)) {
                         String client = jsonMessage.getMessage().split("-")[0];
 
-
-
                         PartnersMessagesConsumer consumer = new PartnersMessagesConsumer(jsonMessage.getMessage(), client);
-
                         consumer.thread.start();
-//                        ClientData.partnersMessagesConsumers.add(consumer);
                         ClientData.addOrSetPartnerListener(client, consumer);
                         System.out.println("Started listening for " + client + "'s messages");
-                    } else if(jsonMessage.getEventType().equals(MessageEvents.disconnectedPartner)) {
+                    } else if (jsonMessage.getEventType().equals(MessageEvents.disconnectedPartner)) {
                         partnerDisconnected(jsonMessage.getMessage());
-                    }
-                    else if(jsonMessage.getEventType().equals(MessageEvents.receiveConnectedClientsList))
-                    {
+                    } else if (jsonMessage.getEventType().equals(MessageEvents.receiveConnectedClientsList)) {
                         System.out.println(jsonMessage.getMessage());
-                        ClientData.gotResponse.compareAndSet(false,true);
+                        ClientData.gotResponse.compareAndSet(false, true);
                     }
                 }
             }, consumerTag -> {
@@ -104,5 +94,21 @@ public class ServerMessagesListener extends Consumer {
 //            partnersMessagesConsumer.thread.interrupt();
 //            ClientData.partnersMessagesConsumers.removeElement(partnersMessagesConsumer);
 //        });
+    }
+
+    public void sendMessage(String queue, String partner) {
+        System.out.println("Write messages. Enter 'EXIT' to return to main menu.");
+
+        String message;
+        try {
+            message = Client.reader.readLine();
+
+            while (!message.equals("EXIT")) {
+                ClientToClientMessageSender.sendMessage(queue, partner, message);
+                message = Client.reader.readLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

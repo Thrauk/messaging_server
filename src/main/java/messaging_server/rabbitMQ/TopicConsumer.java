@@ -30,7 +30,7 @@ public class TopicConsumer extends Consumer {
             channel.queueBind(queueName, topicName, "");
             this.consumerTag=channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
                 SimpleMessage jsonMessage = objectMapper.readValue(message.getBody(), SimpleMessage.class);
-                //System.out.println("Message on topic (" + topicName + ") from: " + jsonMessage.getMessageSender() + "--> " + jsonMessage.getMessage());
+                System.out.println("Message on topic (" + topicName + ") from: " + jsonMessage.getMessageSender() + "--> " + jsonMessage.getMessage());
                 savedMessages.add(jsonMessage);
             }, consumerTag -> {
             });

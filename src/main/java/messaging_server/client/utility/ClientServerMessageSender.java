@@ -25,7 +25,6 @@ public class ClientServerMessageSender {
         message.setEventType(MessageEvents.checkIfConnected);
         message.setMessage(partnerUid);
         jsonMessageProducer.sendEventMessageOnQueue(message, RabbitMQConstants.serverReceivingQueue);
-
     }
 
     public static void sendServerRequest(SimpleEventMessage msg)

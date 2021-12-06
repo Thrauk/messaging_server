@@ -2,8 +2,9 @@ package messaging_server.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
+import messaging_server.client.models.Partner;
 import messaging_server.client.routines.ClientHeartbeat;
-import messaging_server.client.routines.ClientRoutine;
+import messaging_server.client.routines.DirectMessageDisplay;
 import messaging_server.client.utility.ClientServerMessageSender;
 import messaging_server.client.utility.ClientTopicOperations;
 import messaging_server.models.JsonHelper;
@@ -16,6 +17,7 @@ import messaging_server.models.SimpleMessage;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 
@@ -32,12 +34,9 @@ public class Client {
 
         System.out.println("Enter a name for the client: ");
 
-        try
-        {
+        try {
             clientName = reader.readLine();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
             System.out.println("Error while reading client's name");
         }
@@ -59,85 +58,80 @@ public class Client {
         ClientHeartbeat clientHeartbeat = new ClientHeartbeat();
         clientHeartbeat.thread.start();
 
-      // while(!this.thread.isInterrupted())
-        {
+        while (!this.thread.isInterrupted()) {
             clientMenu();
         }
 
     }
 
-    public void clientMenu()
-    {
+    public void clientMenu() {
         showMenu();
 
         int selectedOption = 0;
 
         boolean valueOk = true;
 
-        do{
+        do {
 
             selectedOption = 0;
 
-            try
-            {
+            try {
                 selectedOption = Integer.parseInt(reader.readLine());
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
                 System.out.println("Reading error");
-            }
-            catch (NumberFormatException e)
-            {
+            } catch (NumberFormatException e) {
                 e.printStackTrace();
                 System.out.println("Invalid character");
             }
 
             valueOk = true;
 
-            switch(selectedOption)
-            {
-                case 1:
-                {
+            switch (selectedOption) {
+                case 1: {
                     sendMessageToOtherClients();
-                }break;
+                }
+                break;
 
-                case 2:
-                {
+                case 2: {
+                    readMessagesFromClients();
+                }
+                break;
+
+                case 3: {
                     readSpecificTopic();
-                }break;
+                }
+                break;
 
-                case 3:
-                {
+                case 4: {
                     publishOnTopic();
-                }break;
+                }
+                break;
 
-                case 4:
-                {
+                case 5: {
                     createTopic();
 
-                }break;
+                }
+                break;
 
-                case 5:
-                {
+                case 6: {
                     configureTopicTTL();
-                }break;
+                }
+                break;
 
-                case 6:
-                {
+                case 7: {
                     requestClientList();
-                }break;
+                }
+                break;
 
-                default:
-                {
+                default: {
                     System.out.println("Selected option is not available, please choose again: ");
                     showMenu();
                     valueOk = false;
                 }
             }
 
-        }while(!valueOk);
-
+        } while (!valueOk);
 
     }
 
@@ -146,25 +140,28 @@ public class Client {
         System.out.println("This is client '" + clientName + "' and it can do the following: ");
 
         System.out.println("1) Send a message to other clients.");
-        System.out.println("2) Read/Subscribe to a specific topic.");
-        System.out.println("3) Publish on a topic.");
-        System.out.println("4) Create a new topic.");
-        System.out.println("5) Configure default topic message TTL.");
-        System.out.println("6) Request connected clients list from server.");
+        System.out.println("2) Read messages from other clients.");
+        System.out.println("3) Read/Subscribe to a specific topic.");
+        System.out.println("4) Publish on a topic.");
+        System.out.println("5) Create a new topic.");
+        System.out.println("6) Configure default topic message TTL.");
+        System.out.println("7) Request connected clients list from server.");
 
         System.out.println("What do you want to do? Enter an option:");
 
     }
 
-    public void sendMessageToOtherClients()
-    {
+    public void sendMessageToOtherClients() {
         System.out.println("Write client's name:");
         String partnerName = null;
 
         try {
-
             partnerName = reader.readLine();
-
+            ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
+            while (!ClientData.waitForResponseBool.get()) {
+            }
+//            clientMenu();
+            ClientData.waitForResponseBool.compareAndSet(true, false);
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -174,10 +171,42 @@ public class Client {
 
     }
 
-    public void readSpecificTopic()
-    {
+    public void readMessagesFromClients() {
+        System.out.print("Connected clients: ");
+        ClientData.connectedPartners.exportAsList().forEach((e) -> System.out.println(e.getPartnerId()));
+        System.out.println("Write client's name");
+
+        try {
+            var ref = new Object() {
+                String partnerId = reader.readLine();
+            };
+            while (ClientData.connectedPartners.exportAsList().stream().noneMatch((e) -> e.getPartnerId().equals(ref.partnerId))) {
+                System.out.println("Entered name is invalid. Enter a valid client name");
+                ref.partnerId = reader.readLine();
+            }
+            Optional<Partner> partner = ClientData.connectedPartners.exportAsList().stream().filter((e) -> e.getPartnerId().equals(ref.partnerId)).findFirst();
+
+//            partner.get().getPartnersMessagesConsumer().displayMessages();
+            if (partner.isPresent()) {
+                DirectMessageDisplay directMessageDisplay = new DirectMessageDisplay(partner.get());
+                directMessageDisplay.thread.start();
+
+                String message = reader.readLine();
+                while (!message.equals("EXIT")) {
+                    message = reader.readLine();
+                }
+                directMessageDisplay.thread.interrupt();
+                while (directMessageDisplay.thread.isAlive());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void readSpecificTopic() {
         System.out.println("Write topic name: ");
-        String topicName= null;
+        String topicName = null;
         try {
 
             topicName = reader.readLine();
@@ -189,21 +218,17 @@ public class Client {
 
         }
 
-        if(ClientData.topicSubscriptions.exists(topicName))
-        {
-            TopicConsumer tc =ClientData.topicSubscriptions.get(topicName);
+        if (ClientData.topicSubscriptions.exists(topicName)) {
+            TopicConsumer tc = ClientData.topicSubscriptions.get(topicName);
             tc.getMessagesFromTopic();
-        }
-        else
-        {
+        } else {
             ClientTopicOperations.subscribeToTopic(topicName);
         }
         clientMenu();
 
     }
 
-    public void publishOnTopic()
-    {
+    public void publishOnTopic() {
         System.out.println("Write topic's to subscribe name:");
         String topicName = null;
         try {
@@ -218,7 +243,7 @@ public class Client {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        SimpleMessage sm=new SimpleMessage();
+        SimpleMessage sm = new SimpleMessage();
         sm.setMessage(message);
         sm.setMessageReceiver("");
         sm.setMessageSender(ClientData.clientId);
@@ -227,8 +252,7 @@ public class Client {
         clientMenu();
     }
 
-    public void createTopic()
-    {
+    public void createTopic() {
         System.out.println("Write topic's name:");
         String topicName = null;
         try {
@@ -239,7 +263,7 @@ public class Client {
 
         String message = "";
 
-        SimpleMessage sm=new SimpleMessage();
+        SimpleMessage sm = new SimpleMessage();
         sm.setMessage(message);
         sm.setMessageReceiver("");
         sm.setMessageSender(ClientData.clientId);
@@ -248,13 +272,11 @@ public class Client {
         clientMenu();
     }
 
-    public void configureTopicTTL()
-    {
+    public void configureTopicTTL() {
         //To Be Added
     }
 
-    public void requestClientList()
-    {
+    public void requestClientList() {
         SimpleEventMessage message = new SimpleEventMessage();
         message.setMessageReceiver(RabbitMQConstants.serverId);
         message.setMessageSender(clientName);
@@ -263,7 +285,8 @@ public class Client {
 
         ClientServerMessageSender.sendServerRequest(message);
 
-        while(!ClientData.gotResponse.get()){}
+        while (!ClientData.gotResponse.get()) {
+        }
 
     }
 
