@@ -5,6 +5,7 @@ import com.rabbitmq.client.Channel;
 import messaging_server.client.models.Partner;
 import messaging_server.client.routines.ClientHeartbeat;
 import messaging_server.client.routines.DirectMessageDisplay;
+import messaging_server.client.routines.TopicDisplayRoutine;
 import messaging_server.client.utility.ClientServerMessageSender;
 import messaging_server.client.utility.ClientTopicOperations;
 import messaging_server.models.JsonHelper;
@@ -221,6 +222,23 @@ public class Client {
 
             topicName = reader.readLine();
 
+            if (ClientData.topicSubscriptions.exists(topicName)) {
+                TopicConsumer tc = ClientData.topicSubscriptions.get(topicName);
+                TopicDisplayRoutine tdr = new TopicDisplayRoutine(tc);
+                System.out.println("Reading messages from: " + topicName + ". Write 'EXIT' to return to main menu.");
+                tdr.thread.start();
+                String message = reader.readLine();
+                while (!message.equals("EXIT")) {
+                    message = reader.readLine();
+                }
+                tdr.thread.interrupt();
+                while (tdr.thread.isAlive()) ;
+
+            } else {
+                ClientTopicOperations.subscribeToTopic(topicName);
+                System.out.println("Subscribed to [" + topicName + "] succesfully!");
+            }
+
         } catch (IOException e) {
 
             e.printStackTrace();
@@ -228,18 +246,11 @@ public class Client {
 
         }
 
-        if (ClientData.topicSubscriptions.exists(topicName)) {
-            TopicConsumer tc = ClientData.topicSubscriptions.get(topicName);
-            tc.getMessagesFromTopic();
-        } else {
-            ClientTopicOperations.subscribeToTopic(topicName);
-        }
-        clientMenu();
 
     }
 
     public void publishOnTopic() {
-        System.out.println("Write topic's to subscribe name:");
+        System.out.println("Write topic's name:");
         String topicName = null;
         try {
             topicName = reader.readLine();
@@ -259,7 +270,7 @@ public class Client {
         sm.setMessageSender(ClientData.clientId);
         ClientTopicOperations.publishToTopic(topicName, sm);
 
-        clientMenu();
+
     }
 
     public void createTopic() {
@@ -277,15 +288,13 @@ public class Client {
         sm.setMessage(message);
         sm.setMessageReceiver("");
         sm.setMessageSender(ClientData.clientId);
-        if(!ClientData.topicPublishers.exists(topicName)) {
+        if (!ClientData.topicPublishers.exists(topicName)) {
             ClientTopicOperations.publishToTopic(topicName, sm);
-        }
-        else
-        {
-            System.out.println("Topic ["+topicName+"] exists.");
+        } else {
+            System.out.println("Topic [" + topicName + "] exists.");
         }
 
-        clientMenu();
+
     }
 
     public void configureTopicTTL() {
