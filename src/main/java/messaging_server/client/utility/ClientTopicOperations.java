@@ -1,5 +1,6 @@
 package messaging_server.client.utility;
 
+import messaging_server.client.Client;
 import messaging_server.client.config.DefaultConfig;
 import messaging_server.client.data.ClientData;
 import messaging_server.models.JsonObject;
@@ -37,5 +38,14 @@ public class ClientTopicOperations {
             ClientData.topicPublishers.add(topicName,publisher);
         }
         publisher.publishMessage(message);
+        //-------------VVV--------------- send topicName on every message published on a topic
+        SimpleEventMessage sem=new SimpleEventMessage();
+        sem.setEventType(MessageEvents.messageOnTopic);
+        sem.setMessage(topicName);
+        sem.setMessageReceiver(RabbitMQConstants.serverId);
+        sem.setMessageSender(ClientData.clientId);
+        ClientServerMessageSender.sendServerRequest(sem);
+
+
     }
 }

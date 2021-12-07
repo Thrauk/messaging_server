@@ -13,4 +13,5 @@ public class MessageEvents {
     public static String receiveConnectedClientsList = "receive-connected-clients-list-from-server";
     public static String disconnectedPartner = "disconnected-partner";
     public static String userSubscribeToTopic ="user-subbed-to-topic";
+    public static String messageOnTopic="message-sent-on-topic";
 }
