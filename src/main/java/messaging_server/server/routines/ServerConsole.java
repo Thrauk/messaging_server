@@ -200,7 +200,18 @@ public class ServerConsole extends ServerRoutine{
 
     private void showActiveTopics()
     {
-        //TBI
+        ArrayList<String> listOfTopics = ServerData.topicList.exportAsList();
+        for(String iter :listOfTopics)
+        {
+            System.out.println(iter);
+        }
+        ArrayList<String> listOfTopicsConnected = ServerData.topicSubscribers.exportKeysAsList();
+        System.out.println("");
+        for(String iter :listOfTopicsConnected)
+        {
+            System.out.println(iter);
+        }
+
     }
 
 
