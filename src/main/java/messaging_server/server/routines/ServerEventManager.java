@@ -3,9 +3,7 @@ package messaging_server.server.routines;
 import messaging_server.models.ListMessage;
 import messaging_server.models.SimpleEventMessage;
 import messaging_server.rabbitMQ.MessageEvents;
-import messaging_server.rabbitMQ.MessageResponse;
 import messaging_server.rabbitMQ.RabbitMQConstants;
-import messaging_server.server.Server;
 import messaging_server.server.data.ServerData;
 import messaging_server.server.config.DefaultConfig;
 import messaging_server.server.models.MessageToSend;
@@ -19,25 +17,24 @@ public class ServerEventManager extends ServerRoutine {
         SimpleEventMessage message = ServerData.incomingMessages.popExisting();
 
         String eventType = message.getEventType();
-
         if (eventType.equals(MessageEvents.checkIfConnected)) {
             checkIfConnected(message);
         } else if (eventType.equals(MessageEvents.userSubscribeToTopic)) {
             String topicName = message.getMessage();
             String clientID = message.getMessageSender();
-            if (ServerData.topicSubscribers.exists(topicName)) {
-                ServerData.topicSubscribers.get(topicName).add(clientID);
+            if (ServerData.topicAvailable.exists(topicName)) {
+                ServerData.topicAvailable.get(topicName).add(clientID);
             } else {
                 SafeQueue<String> subscribers = new SafeQueue<>();
                 subscribers.add(clientID);
-                ServerData.topicSubscribers.add(topicName, subscribers);
+                ServerData.topicAvailable.add(topicName, subscribers);
             }
         }
         //if a message is sent on a topic the server receives an event with the topicName and adds it to its list of Topics
         if (eventType.equals(MessageEvents.messageOnTopic)) {
             String topicName = message.getMessage();
-            if (!ServerData.topicList.exists(topicName)) {
-                ServerData.topicList.add(topicName);
+            if (!ServerData.topicAvailable.exists(topicName)) {
+                ServerData.topicAvailable.add(topicName,new SafeQueue<String>());
             } else {
                 System.out.println("Message posted on [" + topicName + "] topic.");
             }

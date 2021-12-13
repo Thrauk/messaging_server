@@ -2,6 +2,7 @@ package messaging_server.client.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import messaging_server.client.Client;
+import messaging_server.client.config.DefaultConfig;
 import messaging_server.client.models.Partner;
 import messaging_server.client.utility.ClientToClientMessageSender;
 import messaging_server.models.SimpleEventMessage;
@@ -22,15 +23,17 @@ public class ServerMessagesListener extends Consumer {
     @Override
     protected void listener() {
         try {
-            channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
+            this.consumerTag = channel.basicConsume(this.queueName, true, (consumerTag, message) -> {
                 SimpleEventMessage jsonMessage = objectMapper.readValue(message.getBody(), SimpleEventMessage.class);
 
                 if (!ClientData.isConnected.get()) {
+
                     if (jsonMessage.getEventType().equals(MessageEvents.connectionRequestResponseSuccessful)) {
                         ClientData.isConnected.compareAndSet(false, true);
                         System.out.println("Client connected successfully");
                     } else {
                         System.out.println("Client connection failed");
+                        ClientData.connectionDupName.compareAndSet(false,true);
                     }
                 } else {
                     if (jsonMessage.getEventType().equals(MessageEvents.checkIfConnectedResponseSuccessful)) {
@@ -57,6 +60,10 @@ public class ServerMessagesListener extends Consumer {
                     } else if (jsonMessage.getEventType().equals(MessageEvents.receiveConnectedClientsList)) {
                         System.out.println(jsonMessage.getMessage());
                         ClientData.gotResponse.compareAndSet(false, true);
+                    } else if (jsonMessage.getEventType().equals(MessageEvents.changeClientMaxQueue)) {
+                        DefaultConfig.nrMaxOfMessagesAccepted = Integer.parseInt(jsonMessage.getMessage());
+                    } else if (jsonMessage.getEventType().equals(MessageEvents.changeClientTopicTTL)) {
+                        DefaultConfig.topicMessageTTL = Integer.parseInt(jsonMessage.getMessage());
                     }
                 }
             }, consumerTag -> {

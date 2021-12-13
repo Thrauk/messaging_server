@@ -2,6 +2,7 @@ package messaging_server.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.rabbitmq.client.Channel;
+import messaging_server.client.config.DefaultConfig;
 import messaging_server.client.models.Partner;
 import messaging_server.client.routines.ClientHeartbeat;
 import messaging_server.client.routines.DirectMessageDisplay;
@@ -52,10 +53,20 @@ public class Client {
         ServerMessagesListener serverMessagesListener = new ServerMessagesListener(ClientData.receivingQueueServerClient);
         serverMessagesListener.thread.start();
 
-
         System.out.println("Waiting for server response...");
 
         while (!ClientData.isConnected.get()) {
+            if(ClientData.connectionDupName.get())
+            {
+
+                System.out.println("Name already in use,server is not home.");
+
+                serverMessagesListener.closeListener();
+
+                this.thread.interrupt();
+                return;
+
+            }
         }
 
         ClientHeartbeat clientHeartbeat = new ClientHeartbeat();
@@ -127,6 +138,10 @@ public class Client {
                 }
                 break;
 
+                case 8: {
+                    showConfig();
+                }
+
                 default: {
                     System.out.println("Selected option is not available, please choose again: ");
                     showMenu();
@@ -149,6 +164,7 @@ public class Client {
         System.out.println("5) Create a new topic.");
         System.out.println("6) Configure default topic message TTL.");
         System.out.println("7) Request connected clients list from server.");
+        System.out.println("8) Show config.");
 
         System.out.println("What do you want to do? Enter an option:");
 
@@ -338,4 +354,12 @@ public class Client {
             System.out.println("An error has occured while trying to send a message on " + queueName + " queue");
         }
     }
+
+    public void showConfig()
+    {
+        System.out.println("Config for client:");
+        System.out.println("Maximum message queue: "+ DefaultConfig.nrMaxOfMessagesAccepted);
+        System.out.println("Client's messages TTL: "+DefaultConfig.topicMessageTTL / 1000 + " s");
+    }
+
 }

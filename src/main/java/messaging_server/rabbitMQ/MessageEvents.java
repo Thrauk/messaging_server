@@ -14,4 +14,7 @@ public class MessageEvents {
     public static String disconnectedPartner = "disconnected-partner";
     public static String userSubscribeToTopic ="user-subbed-to-topic";
     public static String messageOnTopic="message-sent-on-topic";
+    public static String changeClientMaxQueue = "change-client-max-queue";
+    public static String changeClientTopicTTL = "change-client-topic-time-to-live";
+
 }

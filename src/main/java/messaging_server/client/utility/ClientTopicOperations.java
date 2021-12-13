@@ -14,32 +14,31 @@ import messaging_server.server.data.ServerData;
 public class ClientTopicOperations {
     public static void subscribeToTopic(String topicName) {
 
-            TopicConsumer subscription = new TopicConsumer(topicName);
-            ClientData.topicSubscriptions.add(topicName,subscription);
-            subscription.thread.start();
-            SimpleEventMessage sem= new SimpleEventMessage();
-            sem.setEventType(MessageEvents.userSubscribeToTopic);
-            sem.setMessage(topicName);
-            sem.setMessageReceiver(RabbitMQConstants.serverId);
-            sem.setMessageSender(ClientData.clientId);
-            ClientData.messagesToSend.add(sem);
+        TopicConsumer subscription = new TopicConsumer(topicName);
+        ClientData.topicSubscriptions.add(topicName, subscription);
+        subscription.thread.start();
+        SimpleEventMessage sem = new SimpleEventMessage();
+        sem.setEventType(MessageEvents.userSubscribeToTopic);
+        sem.setMessage(topicName);
+        sem.setMessageReceiver(RabbitMQConstants.serverId);
+        sem.setMessageSender(ClientData.clientId);
+
+        ClientServerMessageSender.sendServerRequest(sem);
+
 
     }
-    public static void publishToTopic(String topicName, JsonObject message)
-    {
+
+    public static void publishToTopic(String topicName, JsonObject message) {
         TopicProducer publisher;
-        if(ClientData.topicPublishers.exists(topicName))
-        {
-            publisher=ClientData.topicPublishers.get(topicName);
-        }
-        else
-        {
-            publisher=new TopicProducer(topicName);
-            ClientData.topicPublishers.add(topicName,publisher);
+        if (ClientData.topicPublishers.exists(topicName)) {
+            publisher = ClientData.topicPublishers.get(topicName);
+        } else {
+            publisher = new TopicProducer(topicName);
+            ClientData.topicPublishers.add(topicName, publisher);
         }
         publisher.publishMessage(message);
         //-------------VVV--------------- send topicName on every message published on a topic
-        SimpleEventMessage sem=new SimpleEventMessage();
+        SimpleEventMessage sem = new SimpleEventMessage();
         sem.setEventType(MessageEvents.messageOnTopic);
         sem.setMessage(topicName);
         sem.setMessageReceiver(RabbitMQConstants.serverId);

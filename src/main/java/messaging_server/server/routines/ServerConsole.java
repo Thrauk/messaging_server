@@ -1,9 +1,13 @@
 package messaging_server.server.routines;
 
-import messaging_server.server.Server;
+import messaging_server.models.SimpleEventMessage;
+import messaging_server.rabbitMQ.MessageEvents;
+import messaging_server.rabbitMQ.RabbitMQConstants;
 import messaging_server.server.config.DefaultConfig;
 import messaging_server.server.data.ServerData;
 import messaging_server.server.models.ClientModel;
+import messaging_server.server.models.MessageToSend;
+import messaging_server.structures.SafeQueue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -179,6 +183,10 @@ public class ServerConsole extends ServerRoutine{
                         clientConfigureQueue(selectedClient);
                         break;
 
+                    case 3:
+                        clientConfigureTopicTTL(selectedClient);
+                        break;
+
 
                     default:
                     {
@@ -200,16 +208,17 @@ public class ServerConsole extends ServerRoutine{
 
     private void showActiveTopics()
     {
-        ArrayList<String> listOfTopics = ServerData.topicList.exportAsList();
-        for(String iter :listOfTopics)
-        {
-            System.out.println(iter);
-        }
-        ArrayList<String> listOfTopicsConnected = ServerData.topicSubscribers.exportKeysAsList();
+        ArrayList<String> listOfTopicsConnected = ServerData.topicAvailable.exportKeysAsList();
         System.out.println("");
-        for(String iter :listOfTopicsConnected)
+        for(String topicName :listOfTopicsConnected)
         {
-            System.out.println(iter);
+            String res = "";
+            res += topicName;
+            res += " : [";
+            res += String.join(", ", ServerData.topicAvailable.get(topicName).exportAsList());
+            res += "]";
+
+            System.out.println(res);
         }
 
     }
@@ -220,7 +229,8 @@ public class ServerConsole extends ServerRoutine{
         System.out.println("Configuring options for client "+client.getClientId()+":");
 
         System.out.println("1)Modify client timeout. (Current timeout settings:"+client.getTimeout()+" s)");
-        System.out.println("2)Modify client maximum message queue (Current queue settings: maximum "+client.getMaximumMessageQueue()+" messages in queue)");
+        System.out.println("2)Modify client maximum message queue ");
+        System.out.println("3)Modify topic Time-To-Live");
 
         System.out.println("\n0)Exit to menu");
         System.out.println("Select option:");
@@ -251,6 +261,41 @@ public class ServerConsole extends ServerRoutine{
         client.setTimeout(newTimeout);
     }
 
+    private void clientConfigureTopicTTL(ClientModel selectedClient)
+    {
+        System.out.println("Enter new TTL (s) for this client's messages:");
+
+        int newTTL = 0;
+
+        try
+        {
+            newTTL = Integer.parseInt(reader.readLine());
+            newTTL *= 1000;
+
+            SimpleEventMessage msg = new SimpleEventMessage();
+
+            msg.setEventType(MessageEvents.changeClientTopicTTL);
+            msg.setMessageSender(RabbitMQConstants.serverId);
+            msg.setMessage( String.valueOf(newTTL));
+            msg.setMessageReceiver(selectedClient.getClientId());
+
+            ServerData.messagesToSend.add(new MessageToSend(msg));
+
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+            System.out.println("Reading error occurred!");
+        }
+        catch (NumberFormatException e)
+        {
+            e.printStackTrace();
+            System.out.println("Input is not a number!");
+        }
+
+
+    }
+
     private void clientConfigureQueue(ClientModel client)
     {
         System.out.println("Enter new maximum messages in queue for the client:");
@@ -273,5 +318,18 @@ public class ServerConsole extends ServerRoutine{
         }
 
         client.setMaximumMessageQueue(newMaxQueue);
+
+        SimpleEventMessage msg = new SimpleEventMessage();
+
+        msg.setEventType(MessageEvents.changeClientMaxQueue);
+        msg.setMessageSender(RabbitMQConstants.serverId);
+        msg.setMessage( String.valueOf(newMaxQueue));
+        msg.setMessageReceiver(client.getClientId());
+
+        ServerData.messagesToSend.add(new MessageToSend(msg));
+
+
+
+
     }
 }

@@ -1,9 +1,6 @@
 package messaging_server.server.data;
 
-import messaging_server.client.Client;
 import messaging_server.models.SimpleEventMessage;
-import messaging_server.models.SimpleMessage;
-import messaging_server.server.Server;
 import messaging_server.server.models.ClientModel;
 import messaging_server.server.models.MessageToSend;
 import messaging_server.server.models.json.DisconnectedPartner;
@@ -21,8 +18,8 @@ public class ServerData {
     public static final SafeQueue<SimpleEventMessage> incomingConnectionRequests = new SafeQueue<>();
 
     public static final SafeQueue<String> disconnectedClients = new SafeQueue<>();
-    public static final SafeMap<String, SafeQueue<String>> topicSubscribers = new SafeMap<>();
-    public static final SafeQueue<String> topicList=new SafeQueue<>();
+    public static final SafeMap<String, SafeQueue<String>> topicAvailable = new SafeMap<>();
+   // public static final SafeQueue<String> topicList=new SafeQueue<>();
     public static String getConnectedClientQueue(String clientId) {
         ClientModel client = connectedClients.get(clientId);
         if(client != null) {
@@ -50,7 +47,7 @@ public class ServerData {
     }
     public static void deleteSubscriberFromTopics(String subID)
     {
-        for(SafeQueue<String> x:topicSubscribers.exportValuesAsList())
+        for(SafeQueue<String> x: topicAvailable.exportValuesAsList())
         {
             x.removeElement(subID);
         }
