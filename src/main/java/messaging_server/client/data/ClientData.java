@@ -31,7 +31,7 @@ public class ClientData {
     public static final AtomicBoolean connectionDupName = new AtomicBoolean( false);
 
     public static void setReceivingQueueServerClient() {
-        ClientData.receivingQueueServerClient = clientId + "-" + UUID.randomUUID();
+        ClientData.receivingQueueServerClient = UUID.randomUUID().toString();
     }
 
     public static void addOrSetPartnerListener(String partnerId, PartnersMessagesConsumer partnersMessagesConsumer) {

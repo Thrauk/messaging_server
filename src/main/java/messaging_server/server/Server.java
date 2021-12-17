@@ -15,39 +15,19 @@ public class Server {
 
     private final List<Thread> threads = new ArrayList<>();
 
-    public void serverTestRoutine() {
-
-        serverInitializingRoutine();
-
-        //System.out.println("Server started!");
-
-        //serverListenForMessages.thread.start();
-
-        try {
-            for(Thread thread : threads) {
-                thread.join();
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
-        System.out.println("Server Closed");
-    }
-
     public void serverInitializingRoutine()
     {
         System.out.println("Server initializing");
 
-        //Initializing server's sending queue
+        //Initializing server's sending queued messages routine
         ServerSendQueuedMessages serverSendQueuedMessages = new ServerSendQueuedMessages();
         threads.add(serverSendQueuedMessages.thread);
 
-        //Initializing server's reading messages ability
+        //Initializing server's message listener (from clients)
         ServerMainConsumer serverMainConsumer = new ServerMainConsumer(RabbitMQConstants.serverReceivingQueue);
         threads.add(serverMainConsumer.thread);
 
-        //Initializing server's connection management of clients
+        //Initializing client's connection management routine
         ServerConnectionManager serverConnectionManager = new ServerConnectionManager();
         threads.add(serverConnectionManager.thread);
 
@@ -67,6 +47,17 @@ public class Server {
             thread.start();
         }
 
+
+        try {
+            for(Thread thread : threads) {
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+        System.out.println("Server Closed");
     }
 
     public void serverStoppingRoutine()

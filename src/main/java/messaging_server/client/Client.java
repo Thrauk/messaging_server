@@ -37,6 +37,10 @@ public class Client {
     public void consoleRoutine() {
 
         System.out.println("Enter a name for the client: ");
+        ClientData.setReceivingQueueServerClient();
+        ServerMessagesListener serverMessagesListener = new ServerMessagesListener(ClientData.receivingQueueServerClient);
+        serverMessagesListener.thread.start();
+
 
         try {
             clientName = reader.readLine();
@@ -46,26 +50,28 @@ public class Client {
         }
 
         ClientData.clientId = clientName;
-        ClientData.setReceivingQueueServerClient();
 
         ClientServerMessageSender.sendConnectionRequest();
 
-        ServerMessagesListener serverMessagesListener = new ServerMessagesListener(ClientData.receivingQueueServerClient);
-        serverMessagesListener.thread.start();
+
 
         System.out.println("Waiting for server response...");
 
         while (!ClientData.isConnected.get()) {
-            if(ClientData.connectionDupName.get())
-            {
+            if (ClientData.connectionDupName.get()) {
+                ClientData.connectionDupName.set(false);
+                System.out.println("Name already in use!");
+                System.out.println("Enter another name for the client: ");
+                try {
+                    clientName = reader.readLine();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.out.println("Error while reading client's name");
+                }
 
-                System.out.println("Name already in use,server is not home.");
+                ClientData.clientId = clientName;
 
-                serverMessagesListener.closeListener();
-
-                this.thread.interrupt();
-                return;
-
+                ClientServerMessageSender.sendConnectionRequest();
             }
         }
 
@@ -175,24 +181,32 @@ public class Client {
 
         try {
             String partnerName = reader.readLine();
-            Optional<Partner> maybePartner = ClientData.connectedPartners
-                    .exportAsList()
-                    .stream()
-                    .filter((e) -> e.getPartnerId()
-                            .equals(partnerName)).findFirst();
-            if (maybePartner.isPresent() && maybePartner.get().getSendingQueue().length() > 0) {
-                ServerMessagesListener.sendMessage(maybePartner.get().getSendingQueue(), partnerName);
-            } else {
-                ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
-                while (!ClientData.waitForResponseBool.get()) ;
+            if (!partnerName.equals(ClientData.clientId)) {
 
-                ClientData.waitForResponseBool.compareAndSet(true, false);
+
+                Optional<Partner> maybePartner = ClientData.connectedPartners
+                        .exportAsList()
+                        .stream()
+                        .filter((e) -> e.getPartnerId()
+                                .equals(partnerName)).findFirst();
+                if (maybePartner.isPresent() && maybePartner.get().getSendingQueue().length() > 0) {
+                    ServerMessagesListener.sendMessage(maybePartner.get().getSendingQueue(), partnerName);
+                } else {
+                    ClientServerMessageSender.sendCheckIfPartnerConnected(partnerName);
+                    while (!ClientData.waitForResponseBool.get()) ;
+
+                    ClientData.waitForResponseBool.compareAndSet(true, false);
+                }
+            } else {
+                System.out.println("You can not send messages to yourself");
             }
+
         } catch (IOException e) {
 
             e.printStackTrace();
             System.out.println("Reading error");
         }
+
     }
 
     public void readMessagesFromClients() {
@@ -355,11 +369,10 @@ public class Client {
         }
     }
 
-    public void showConfig()
-    {
+    public void showConfig() {
         System.out.println("Config for client:");
-        System.out.println("Maximum message queue: "+ DefaultConfig.nrMaxOfMessagesAccepted);
-        System.out.println("Client's messages TTL: "+DefaultConfig.topicMessageTTL / 1000 + " s");
+        System.out.println("Maximum message queue: " + DefaultConfig.nrMaxOfMessagesAccepted);
+        System.out.println("Client's messages TTL: " + DefaultConfig.topicMessageTTL / 1000 + " s");
     }
 
 }

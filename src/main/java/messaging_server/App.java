@@ -52,7 +52,7 @@ public class App {
         Server server = new Server();
         ConnectionManager.createConnection();
 
-        Thread serverThread = new Thread(server::serverTestRoutine);
+        Thread serverThread = new Thread(server::serverInitializingRoutine);
 
         serverThread.start();
     }
@@ -62,7 +62,7 @@ public class App {
         Server server = new Server();
         ConnectionManager.createConnection();
 
-        Thread serverThread = new Thread(server::serverTestRoutine);
+        Thread serverThread = new Thread(server::serverInitializingRoutine);
         serverThread.start();
     }
 
